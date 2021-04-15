@@ -1004,6 +1004,9 @@ opus_read_raw <- function(
   #   )
   # }
 
+  # Close connection
+  close(con)
+
   # Return spectra data and metadata contained as elements in list out
   out
 }
