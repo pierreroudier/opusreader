@@ -24,10 +24,8 @@
 # http://stackoverflow.com/questions/30216613/how-to-use-dopar-when-only-import-foreach-in-description-of-a-package
 # Got the following error:
 # "Error : object '`%do%`' is not exported by 'namespace:foreach'"
-#
-#  @include opus_read_raw.R
-#
-#' @importFrom foreach %dopar% %do%
+#' @include opus_read_raw.R
+#' @importFrom hexView readRaw
 #' @export
 #'
 #' @author Philipp Baumann
@@ -38,9 +36,6 @@ opus_read_file <- function(
   print_progress = TRUE,
   atm_comp_minus4offset = FALSE
 ) {
-
-  # Avoid `R CMD check` NOTE: no visible binding for global variable ...
-  x <- y <- i <- npt <- NULL
 
   if (!file.exists(file_path)) {
     stop(paste0("File does not exist"))

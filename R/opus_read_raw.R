@@ -4,6 +4,7 @@
 #' Read single binary acquired with an
 #' Bruker Vertex FTIR Instrument
 #'
+#' @param pr a raw vector
 #' @param extract Character vector of spectra types to extract from OPUS binary
 #' file. Default is \code{c("spc")}, which will extract the final spectra, e.g.
 #' expressed in absorbance (named \code{AB} in Bruker OPUS programs). Possible
@@ -18,16 +19,21 @@
 #' compensation are read with an offset of \code{-4} bites from Bruker OPUS
 #' files. Default is \code{FALSE}.
 #'
-#'
+#' @importFrom foreach %dopar% %do%
 #' @export
 #'
 #' @author Philipp Baumann
 #'
 opus_read_raw <- function(
+  pr,
   extract = c("spc"),
   print_progress = TRUE,
   atm_comp_minus4offset = FALSE
 ) {
+
+  # Avoid `R CMD check` NOTE: no visible binding for global variable ...
+  x <- y <- i <- npt <- NULL
+
   # Read byte positions for selected 3 letter strings that flag important
   # spectral information -----------------------------------------------------
 
@@ -95,8 +101,10 @@ opus_read_raw <- function(
 
   # Read all number of points (NPT) at once
   NPT <- foreach::foreach(npt = npt_all, .combine = 'c') %do% {
+
     hexView::readRaw(
       file_path, offset = npt, nbytes = 12, human = "int", size = 4)[[5]][2]
+
   }
 
   # Specific error for file: <"data/soilspec_eth_bin/CI_tb_05_soil_cal.2">
