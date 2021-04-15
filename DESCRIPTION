@@ -2,12 +2,23 @@ Package: opusreader
 Title: Reading OPUS Binary Files in R
 Version: 0.0.0.9000
 Authors@R: c(
-    person(given = "Philipp",
-           family = "Baumann",
-           role = c("aut"),
-           email = NULL),
-    person("Pierre", "Roudier", email = "roudierp@landcareresearch.co.nz", role = c("aut", "cre"))
-Description: This package implements a driver for FTIR spectroscopy data collected in the OPUS binary format. 
+    person(
+        given = "Philipp", 
+        family = "Baumann", 
+        role = c("aut"), 
+        email = NULL, 
+        comment = c(ORCID = "0000-0001-8066-1615")
+    ),
+    person(
+        given = "Pierre", 
+        family = "Roudier", 
+        role = c("aut", "cre"), 
+        email = "roudierp@landcareresearch.co.nz", 
+        comment = c(ORCID = "0000-0001-7431-2603")
+    ))
+Description: This package implements a driver for FTIR spectroscopy data collected in the OPUS binary format.
+URL: http://github.com/pierreroudier/opusreader
+BugReports: http://github.com/pierreroudier/opusreader/issues
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
