@@ -98,13 +98,14 @@ opus_read_raw <- function(
   # --------------------------------------------------------------------------
 
   ## Read basic spectral information =========================================
+  con <- rawConnection(pr)
 
   # Read all number of points (NPT) at once
   NPT <- foreach::foreach(npt = npt_all, .combine = 'c') %do% {
 
-    hexView::readRaw(
-      file_path, offset = npt, nbytes = 12, human = "int", size = 4)[[5]][2]
-
+    # hexView::readRaw(file_path, offset = npt, nbytes = 12, human = "int", size = 4)[[5]][2]
+    seek(con, npt, origin = "start")
+    readBin(con, what = "integer", n = 12, size = 4)[2]
   }
 
   # Specific error for file: <"data/soilspec_eth_bin/CI_tb_05_soil_cal.2">
@@ -213,9 +214,11 @@ opus_read_raw <- function(
   # Read number of points corresponding to spectra in file -------------------
 
   NPT_spc <- foreach::foreach(i = 1:length(npt_spc), .combine = 'c') %do% {
-    hexView::readRaw(
-      file_path, offset = npt_spc[i],
-      nbytes = 12, human = "int", size = 4)[[5]][2]
+
+    # hexView::readRaw(file_path, offset = npt_spc[i], nbytes = 12, human = "int", size = 4)[[5]][2]
+
+    seek(con, npt_spc[i], origin = "start")
+    readBin(con, what = "integer", n = 12, size = 4)[2]
   }
 
   # Delete NPT with negative signs
@@ -223,24 +226,49 @@ opus_read_raw <- function(
 
   ## Read all spectra ========================================================
 
-  spc <- Map(function(end, NPT) hexView::readRaw(file_path, width = NULL,
-                                                 offset = end - 4, nbytes = NPT * 4,
-                                                 human = "real", size = 4, endian = "little")[[5]], end_spc, NPT_spc)
+  spc <- Map(
+    function(end, NPT) {
+
+      # hexView::readRaw(
+      #   file_path,
+      #   width = NULL,
+      #   offset = end - 4,
+      #   nbytes = NPT * 4,
+      #   human = "real",
+      #   size = 4,
+      #   endian = "little"
+      # )[[5]]
+
+      seek(con, end - 4, origin = "start")
+      readBin(con, what = "numeric", n = NPT * 4, size = 4, endian = "little")
+
+    },
+    end_spc,
+    NPT_spc
+  )
 
   # Read FXV and LXV and calculate wavenumbers  ------------------------------
 
   FXV_spc <- foreach::foreach(i = 1:length(fxv_spc), .combine = 'c') %do% {
-    hexView::readRaw(file_path,
-                     offset = fxv_spc[i], nbytes = 16, human = "real", size = 8)[[5]][1]
+
+    # hexView::readRaw(file_path, offset = fxv_spc[i], nbytes = 16, human = "real", size = 8)[[5]][1]
+
+    seek(con, fxv_spc[i], origin = "start")
+    readBin(con, what = "numeric", n = 16, size = 8)[1]
+
   }
+
   LXV_spc <- foreach::foreach(i = 1:length(lxv_spc), .combine = 'c') %do% {
-    hexView::readRaw(file_path,
-                     offset = lxv_spc[i], nbytes = 16, human = "real", size = 8)[[5]][1]
+
+    # hexView::readRaw(file_path, offset = lxv_spc[i], nbytes = 16, human = "real", size = 8)[[5]][1]
+
+    seek(con, lxv_spc[i], origin = "start")
+    readBin(con, what = "numeric", n = 16, size = 8)[1]
   }
+
   # Calculate wavenumbers
   wavenumbers <- foreach::foreach(i = 1:length(FXV_spc)) %do% {
-    rev(seq(LXV_spc[i], FXV_spc[i],
-            (FXV_spc[i] - LXV_spc[i]) / (NPT_spc[i] - 1)))
+    rev(seq(LXV_spc[i], FXV_spc[i], (FXV_spc[i] - LXV_spc[i]) / (NPT_spc[i] - 1)))
   }
 
   ## Assigning list of intially read spectra depending on block type =========
@@ -368,11 +396,27 @@ opus_read_raw <- function(
   # quick fix to read files with different offsets after atmospheric
   # compensation -------------------------------------------------------------
   if (length(which_AB) == 2 && !atm_comp_minus4offset) {
-    spc[[which_AB[length(which_AB)]]] <-
-      hexView::readRaw(file_path, width = NULL,
-                       offset = end_spc[which_AB[length(which_AB)]],
-                       nbytes = NPT_spc[which_AB[length(which_AB)]] * 4,
-                       human = "real", size = 4, endian = "little")[[5]]
+
+    # spc[[which_AB[length(which_AB)]]] <- hexView::readRaw(
+    #   file_path,
+    #   width = NULL,
+    #   offset = end_spc[which_AB[length(which_AB)]],
+    #   nbytes = NPT_spc[which_AB[length(which_AB)]] * 4,
+    #   human = "real",
+    #   size = 4,
+    #   endian = "little"
+    # )[[5]]
+
+
+    seek(con, end_spc[which_AB[length(which_AB)]], origin = "start")
+    spc[[which_AB[length(which_AB)]]] <- readBin(
+      con,
+      what = "integer",
+      n = NPT_spc[which_AB[length(which_AB)]] * 4,
+      size = 4,
+      endian = "little"
+    )
+
   }
 
   # Assign spectra type for final spectra in element names of spc list -------
@@ -402,12 +446,25 @@ opus_read_raw <- function(
   # Read with new offset when first value of
   # ScSm  single channel sample spectrumspectrum is 0 and replace previous ---
   if (any(names(spc) %in% "ScSm" & spc[["ScSm"]][1] == 0)) {
-    spc[["ScSm"]] <-
-      hexView::readRaw(file_path, width = NULL,
-                       offset = end_spc[Sc_assigned$spc_idx[Sc_assigned$spc_code == "ScSm"]],
-                       nbytes = NPT_spc[Sc_assigned$spc_idx[Sc_assigned$spc_code == "ScSm"]]
-                       * 4,
-                       human = "real", size = 4, endian = "little")[[5]]
+
+    # spc[["ScSm"]] <- hexView::readRaw(
+    #   file_path,
+    #   width = NULL,
+    #   offset = end_spc[Sc_assigned$spc_idx[Sc_assigned$spc_code == "ScSm"]],
+    #   nbytes = NPT_spc[Sc_assigned$spc_idx[Sc_assigned$spc_code == "ScSm"]] * 4,
+    #   human = "real",
+    #   size = 4,
+    #   endian = "little"
+    # )[[5]]
+
+    seek(con, end_spc[Sc_assigned$spc_idx[Sc_assigned$spc_code == "ScSm"]], origin = "start")
+    spc[["ScSm"]] <- readBin(
+      con,
+      what = "integer",
+      n = NPT_spc[Sc_assigned$spc_idx[Sc_assigned$spc_code == "ScSm"]] * 4,
+      size = 4,
+      endian = "little"
+    )
   }
 
   ## Get additional parameters from OPUS binary file =========================
