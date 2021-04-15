@@ -240,7 +240,7 @@ opus_read_raw <- function(
       # )[[5]]
 
       seek(con, end - 4, origin = "start")
-      readBin(con, what = "numeric", n = NPT * 4, size = 4, endian = "little")
+      readBin(con, what = "numeric", n = NPT, size = 4, endian = "little")
 
     },
     end_spc,
@@ -322,15 +322,18 @@ opus_read_raw <- function(
   }
 
   # Assign single channel spectra if present in file -------------------------
+
   # Return idx (index names) of all remaining spectra that are not
   # interferograms
   notIg <- names(spc)[!names(spc) %in%
                         c(Ig_assigned$spc_idx, na_assigned$spc_idx)]
+
   # Check if the MIR range was measured
   wavenumbers_mir <- lapply(names(wavenumbers[notIg]),
                             function(i) spc[[i]][wavenumbers[notIg][[i]] < 2392 &
                                                    wavenumbers[notIg][[i]] > 2358])
   is_mir <- any(sapply(wavenumbers_mir, function(x) length(x) != 0))
+
   if (isTRUE(is_mir)) {
     # Calculate peak ratio for absorbance at around 2392 cm^(-1)
     # and 2358 cm^(-1)
@@ -407,12 +410,12 @@ opus_read_raw <- function(
     #   endian = "little"
     # )[[5]]
 
-
     seek(con, end_spc[which_AB[length(which_AB)]], origin = "start")
     spc[[which_AB[length(which_AB)]]] <- readBin(
       con,
       what = "integer",
-      n = NPT_spc[which_AB[length(which_AB)]] * 4,
+      # n = NPT_spc[which_AB[length(which_AB)]] * 4,
+      n = NPT_spc[which_AB[length(which_AB)]],
       size = 4,
       endian = "little"
     )
@@ -461,7 +464,8 @@ opus_read_raw <- function(
     spc[["ScSm"]] <- readBin(
       con,
       what = "integer",
-      n = NPT_spc[Sc_assigned$spc_idx[Sc_assigned$spc_code == "ScSm"]] * 4,
+      # n = NPT_spc[Sc_assigned$spc_idx[Sc_assigned$spc_code == "ScSm"]] * 4,
+      n = NPT_spc[Sc_assigned$spc_idx[Sc_assigned$spc_code == "ScSm"]],
       size = 4,
       endian = "little"
     )
@@ -470,94 +474,329 @@ opus_read_raw <- function(
   ## Get additional parameters from OPUS binary file =========================
 
   # Instrument parameters ----------------------------------------------------
+
   ins <- grepRaw("INS", pr, all = TRUE) # Instrument type
-  INS <- hexView::blockString(
-    hexView::readRaw(
-      file_path, offset = ins[length(ins)] + 7,
-      nbytes = 10, human = "char", size = 1, endian = "little"))
+
+  # INS <- hexView::blockString(
+  #   hexView::readRaw(
+  #     file_path, offset = ins[length(ins)] + 7,
+  #     nbytes = 10, human = "char", size = 1, endian = "little")
+  #   )
+
+  seek(con, ins[length(ins)] + 7, origin = "start")
+  INS <- readBin(
+    con,
+    what = "character",
+    n = 10,
+    size = 1,
+    endian = "little"
+  )[1]
+
   lwn <- grepRaw("LWN", pr, all = TRUE)[1] + 7 # Laser wavenumber
-  LWN <- hexView::readRaw(file_path, offset = lwn,
-                          nbytes = 8, human = "real", size=8)[[5]][1]
+
+  # LWN <- hexView::readRaw(file_path, offset = lwn, nbytes = 8, human = "real", size=8)[[5]][1]
+  seek(con, lwn, origin = "start")
+  LWN <- readBin(
+    con,
+    what = "numeric",
+    n = 8,
+    size = 8
+  )[1]
+
   tsc <- grepRaw("TSC", pr, all = TRUE) + 7 # Scanner temperature
-  TSC_all <- lapply(tsc, function(tsc)
-    hexView::readRaw(file_path, offset = tsc,
-                     nbytes = 16, human = "real", size = 8)[[5]][[1]] # can include sample
-    # and background temperature
-  )
+
+  TSC_all <- lapply(tsc, function(tsc) {
+
+    # hexView::readRaw(
+    #   file_path,
+    #   offset = tsc,
+    #   nbytes = 16,
+    #   human = "real",
+    #   size = 8
+    # )[[5]][[1]] # can include sample and background temperature
+    seek(con, tsc, origin = "start")
+    readBin(
+      con,
+      what = "numeric",
+      n = 16,
+      size = 8
+    )[[1]]
+  })
+
   # Read relative humidity of the interferometer during measurement
   hum_rel <- grepRaw("HUM", pr, all = TRUE) + 7
-  HUM_rel <- lapply(hum_rel, function(hum_rel)
-    hexView::readRaw(
-      file_path, offset = hum_rel, nbytes = 16,
-      human = "int", size = 8)[[5]][[1]] # can include sample and background
-    # humidity
-  )
+
+  HUM_rel <- lapply(
+    hum_rel,
+    function(hum_rel) {
+      # can include sample and background humidity
+
+      # hexView::readRaw(
+      #   file_path,
+      #   offset = hum_rel,
+      #   nbytes = 16,
+      #   human = "int",
+      #   size = 8
+      # )[[5]][[1]]
+
+      seek(con, hum_rel, origin = "start")
+      readBin(
+        con,
+        what = "numeric",
+        n = 16,
+        size = 8
+      )[[1]]
+    })
+
   # Read absolute humidity of the interferometer during measurement
   hum_abs <- grepRaw("HUA", pr, all = TRUE) + 7
-  HUM_abs <- lapply(hum_abs, function(hum_abs)
-    hexView::readRaw(
-      file_path, offset = hum_abs, nbytes = 16,
-      human = "real", size = 8)[[5]][[1]] # can include sample and background
-    # humidity
-  )
+
+  HUM_abs <- lapply(
+    hum_abs,
+    function(hum_abs) {
+      # can include sample and background humidity
+
+      # hexView::readRaw(
+      #   file_path,
+      #   offset = hum_abs,
+      #   nbytes = 16,
+      #   human = "real",
+      #   size = 8
+      # )[[5]][[1]]
+
+      seek(con, hum_abs, origin = "start")
+      readBin(
+        con,
+        what = "numeric",
+        n = 16,
+        size = 8
+      )[[1]]
+
+    })
 
   # Optics parameters --------------------------------------------------------
+
   src <- grepRaw("SRC", pr, all = TRUE) # Source: MIR or NIR
-  SRC <- hexView::blockString(
-    hexView::readRaw(
-      file_path, offset = src[length(src)] + 4,
-      nbytes = 3, human = "char", size = 1, endian = "little"))
-  instr_range <- tolower(paste(INS, SRC, sep = "-")) # instrument range
+
+  # SRC <- hexView::blockString(
+  #   hexView::readRaw(
+  #     file_path,
+  #     offset = src[length(src)] + 4,
+  #     nbytes = 3,
+  #     human = "char",
+  #     size = 1,
+  #     endian = "little"
+  #   )
+  # )
+  seek(con, src[length(src)] + 4, origin = "start")
+  SRC <- readBin(
+    con,
+    what = "character",
+    n = 3,
+    size = 1,
+    endian = "little"
+  )[[1]][1]
+
+  # instrument range
+  instr_range <- tolower(paste(INS, SRC, sep = "-"))
+
   bms <- grepRaw("BMS", pr, all = TRUE) # Beamsplitter
-  BMS <- hexView::blockString(
-    hexView::readRaw(file_path, offset = bms[length(bms)] + 4,
-                     nbytes = 3, human = "char", size = 1, endian = "little"))
+
+
+  # BMS <- hexView::blockString(
+  #   hexView::readRaw(
+  #     file_path,
+  #     offset = bms[length(bms)] + 4,
+  #     nbytes = 3,
+  #     human = "char",
+  #     size = 1,
+  #     endian = "little"
+  #   )
+  # )
+  #
+  seek(con, bms[length(bms)] + 4, origin = "start")
+  BMS <- readBin(
+    con,
+    what = "character",
+    n = 3,
+    size = 1,
+    endian = "little"
+  )[[1]][1]
+  BMS <- stringr::str_split(BMS, "\\,")[[1]][1] # to be replaced with base stuff
 
   # Fourier transform parameters ---------------------------------------------
   zff <- grepRaw("ZFF", pr, all = TRUE)[1] + 5 # Zero filling factor (numeric)
-  ZFF <- hexView::readRaw(file_path, offset = zff,
-                          nbytes = 4, human = "int", size=2)[[5]][1]
+
+  # ZFF <- hexView::readRaw(
+  #   file_path,
+  #   offset = zff,
+  #   nbytes = 4,
+  #   human = "int",
+  #   size = 2
+  # )[[5]][1]
+
+  seek(con, zff, origin = "start")
+  ZFF <- readBin(
+    con,
+    what = "integer",
+    n = 4,
+    size = 2,
+    endian = "little"
+  )[1]
 
   # (Additional) Standard parameters -----------------------------------------
+
   csf_all <- grepRaw("CSF", pr, all = TRUE) + 7 # y-scaling factor
+
   # Read only CSF byte positions that correspond to final spectra
-  CSF <- lapply(csf_all[npt_all %in% npt_spc],
-                function(csf) hexView::readRaw(
-                  file_path, offset = csf, nbytes = 8, human = "real", size = 8)[[5]][1])
+  CSF <- lapply(
+    csf_all[npt_all %in% npt_spc],
+    function(csf) {
+
+      # hexView::readRaw(
+      #   file_path,
+      #   offset = csf,
+      #   nbytes = 8,
+      #   human = "real",
+      #   size = 8
+      # )[[5]][1]
+
+      seek(con, csf, origin = "start")
+      readBin(
+        con,
+        what = "numeric",
+        n = 8,
+        size = 8,
+        endian = "little"
+      )[1]
+
+    })
+
+
   mxy_all <- grepRaw("MXY", pr, all = TRUE) + 7 # Y-maximum
-  MXY <- unlist(lapply(mxy_all[npt_all %in% npt_spc],
-                       function(mxy) hexView::readRaw(
-                         file_path, offset = mxy, nbytes = 8, human = "real", size = 8)[[5]][1]))
-  mny <- grepRaw("MNY", pr, all = TRUE) + 7 # Y-minimum
-  dxu_all <- grepRaw("DXU", pr, all = TRUE) + 7 # X units
-  DXU <- lapply(dxu_all, function(dxu)
-    hexView::blockString(
-      hexView::readRaw(file_path, offset = dxu,
-                       nbytes = 3, human = "char", size = 1, endian = "little")
+
+  MXY <- unlist(
+    lapply(
+      mxy_all[npt_all %in% npt_spc],
+      function(mxy) {
+
+        # hexView::readRaw(
+        #   file_path,
+        #   offset = mxy,
+        #   nbytes = 8,
+        #   human = "real",
+        #   size = 8
+        # )[[5]][1]
+
+        seek(con, mxy, origin = "start")
+        readBin(
+          con,
+          what = "numeric",
+          n = 8,
+          size = 8
+        )[1]
+      }
     )
   )
+
+  mny <- grepRaw("MNY", pr, all = TRUE) + 7 # Y-minimum
+
+  dxu_all <- grepRaw("DXU", pr, all = TRUE) + 7 # X units
+
+  DXU <- lapply(
+    dxu_all,
+    function(dxu) {
+      # hexView::blockString(
+
+        # hexView::readRaw(
+        #   file_path,
+        #   offset = dxu,
+        #   nbytes = 3,
+        #   human = "char",
+        #   size = 1,
+        #   endian = "little"
+        # )
+
+        seek(con, dxu, origin = "start")
+        readBin(
+          con,
+          what = "character",
+          n = 3,
+          size = 1,
+          endian = "little"
+        )[1]
+      # )
+    }
+  )
+
   # Y units -> there is no DYU present in file
   dyu_all <- grepRaw("DYU", pr, all = TRUE) + 7
   dat <- grepRaw("DAT", pr, all = TRUE) + 7 # Date
+
   tim <- grepRaw("TIM", pr, all = TRUE) + 7 # Time
-  time <- unlist(lapply(tim, function(tim)
-    hexView::blockString(
-      hexView::readRaw(file_path, offset = tim,
-                       nbytes = 22, human = "char",
-                       size = 1, endian = "little")))
+
+  time <- unlist(
+    lapply(
+      tim,
+      function(tim) {
+
+        # hexView::blockString(
+        #   hexView::readRaw(
+        #     file_path,
+        #     offset = tim,
+        #     nbytes = 22,
+        #     human = "char",
+        #     size = 1,
+        #     endian = "little"
+        #   )
+        # )
+
+        seek(con, tim, origin = "start")
+        readBin(
+          con,
+          what = "character",
+          n = 22,
+          size = 1,
+          endian = "little"
+        )[1]
+      }
+    )
   )
+
   # Only select "DAT" string positions that are immediately before time
   dat_sel <- foreach::foreach(i = 1:length(tim), .combine = 'c') %do% {
     diff_sel <- dat - tim[i]
     dat[which(diff_sel <= 32 & diff_sel >= -20)]
   }
-  date <- lapply(dat_sel, function(dat) hexView::blockString(
-    hexView::readRaw(file_path, offset = dat,
-                     nbytes = 10, human = "char", size = 1,
-                     endian = "little"))
+
+  date <- lapply(
+    dat_sel,
+    function(dat) {
+
+      # hexView::blockString(
+      #   hexView::readRaw(
+      #     file_path,
+      #     offset = dat,
+      #     nbytes = 10,
+      #     human = "char",
+      #     size = 1,
+      #     endian = "little"
+      #   )
+      # )
+      seek(con, dat, origin = "start")
+      readBin(
+        con,
+        what = "character",
+        n = 10,
+        size = 1,
+        endian = "little"
+      )[1]
+
+    }
   )
 
   date_time <- unique(paste(date, time))
+
   # Convert date_time from character to class POSIXct (calendar date and time)
   date_time <- as.POSIXct(date_time, format = "%d/%m/%Y %H:%M:%S")
   # , tz = "GMT+1") # tz is argument for time zone
@@ -566,61 +805,131 @@ opus_read_raw <- function(
   # in file are not 1 --------------------------------------------------------
   # Set names of CSF elements equal to spectra list element names
   names(CSF) <- names(spc)
+
   if (any(unlist(CSF) != 1)) {
     # Return all elements in CSF that have scaling value not equal to 1
     CSF_toscale <- Filter(function(x) x != 1, CSF)
     # Apply scaling for spectra with CSF value not equal to 1;
     # Map() returns list
-    spc_scaled <- Map(function(CSF, spc) CSF * spc,
-                      unlist(CSF_toscale), spc[names(CSF_toscale)])
+    spc_scaled <- Map(function(CSF, spc) CSF * spc, unlist(CSF_toscale), spc[names(CSF_toscale)])
+
     # Replace all spc list elements that have CSF not equal 1 with
     # scaled values
     spc <- replace(x = spc, list = names(CSF_toscale), values = spc_scaled)
   }
 
-  # Data aquisition parameters -----------------------------------------------
+  # Data acquisition parameters -----------------------------------------------
 
   plf <- grepRaw("PLF", pr, all = TRUE) + 4 # Result spectrum
-  PLF_all <- lapply(plf, function(plf) hexView::blockString(
-    hexView::readRaw(file_path, offset = plf,
-                     nbytes = 2, human = "char", size = 1,
-                     endian = "little"))
+
+  PLF_all <- lapply(
+    plf,
+    function(plf) {
+
+      # hexView::blockString(
+      #   hexView::readRaw(
+      #     file_path,
+      #     offset = plf,
+      #     nbytes = 2,
+      #     human = "char",
+      #     size = 1,
+      #     endian = "little"
+      #   )
+      # )
+
+      seek(con, plf, origin = "start")
+      res <- readBin(
+        con,
+        what = "character",
+        n = 2,
+        size = 1,
+        endian = "little"
+      )[1]
+      stringr::str_split(res, "\\,")[[1]][1]
+    }
   )
+
   # Select only result spectra abbreviations that are more than 0 characters
   # long
   PLF <- unlist(PLF_all[lapply(PLF_all, nchar) > 0])
+
   res <- grepRaw("RES", pr, all = TRUE)[1] + 5 # Resolution (wavenumber)
-  RES <- hexView::readRaw(
-    file_path, offset = res, nbytes = 4, human = "int", size = 2)[[5]][1]
+
+  # RES <- hexView::readRaw(
+  #   file_path,
+  #   offset = res,
+  #   nbytes = 4,
+  #   human = "int",
+  #   size = 2
+  # )[[5]][1]
+
+  seek(con, res, origin = "start")
+  RES <- readBin(
+    con,
+    what = "integer",
+    n = 4,
+    size = 2,
+    endian = "little"
+  )[1]
 
   ## Create sample metadata objects ==========================================
-  # File name
-  file_name_nopath <- sub(".+/(.+)", "\\1", file_path)
-  # Create sample id from file name;
-  # remove extension .0, .1 etc. from OPUS files
-  sample_id <- sub("(.+)\\.[[:digit:]]+$", "\\1", file_name_nopath)
-  # Extract sample repetition number (rep_no) from file name
-  rep_no <- sub(".+\\.([[:digit:]])+$", "\\1", file_path)
+
   snm <- grepRaw("SNM", pr, all = TRUE)[1] + 7
-  SNM <- hexView::blockString(
-    hexView::readRaw(file_path, offset = snm,
-                     nbytes = 30, human = "char", size = 1, endian = "little")
-  )
+
+  # SNM <- hexView::blockString(
+  #   hexView::readRaw(
+  #     file_path,
+  #     offset = snm,
+  #     nbytes = 30,
+  #     human = "char",
+  #     size = 1,
+  #     endian = "little"
+  #   )
+  # )
+
+  seek(con, snm, origin = "start")
+  SNM <- readBin(
+    con,
+    what = "character",
+    n = 30,
+    size = 1,
+    endian = "little"
+  )[1]
+
+
+  # == sample ID ==
+
+  # # File name
+  # file_name_nopath <- sub(".+/(.+)", "\\1", file_path)
+  #
+  # # Create sample id from file name;
+  # # remove extension .0, .1 etc. from OPUS files
+  # sample_id <- sub("(.+)\\.[[:digit:]]+$", "\\1", file_name_nopath)
+  #
+  # # Extract sample repetition number (rep_no) from file name
+  # rep_no <- sub(".+\\.([[:digit:]])+$", "\\1", file_path)
+
+  sample_id <- unlist(strsplit(SNM, ";"))[1]
+  rep_no <- NA
+  file_name_nopath <- NA
+
   # Create unique_id using file_name and time
   # ymd_id <- format(max(date_time), "%Y%m%d")
   ymdhms_id <- max(date_time)
-  unique_id <- paste0(file_name_nopath, "_", ymdhms_id)
+  unique_id <- paste0(sample_id, "_", ymdhms_id)
 
   ## Convert all spectra in list spc into a matrix of 1 row ==================
-  spc_m <- lapply(spc,
-                  function(x) matrix(x, ncol = length(x), byrow = FALSE))
+  spc_m <- lapply(spc, function(x) matrix(x, ncol = length(x), byrow = FALSE))
+
   # Add dimnames (wavenumbers for columns and unique_id for rows
-  spc_m <- foreach::foreach(i = 1:length(spc_m),
-                            .final = function(i) setNames(i, names(spc_m))) %do% {
-                              colnames(spc_m[[i]]) <- round(wavenumbers[[i]], 1)
-                              rownames(spc_m[[i]]) <- unique_id
-                              data.table::as.data.table(spc_m[[i]])
-                            }
+  spc_m <- foreach::foreach(
+    i = 1:length(spc_m),
+    .final = function(i) setNames(i, names(spc_m))
+    ) %do% {
+      colnames(spc_m[[i]]) <- round(wavenumbers[[i]], 1)
+      rownames(spc_m[[i]]) <- unique_id
+      data.table::as.data.table(spc_m[[i]])
+    }
 
   # Save all relevant data parameters (metadata)
   # in tibble data frame (class "data.frame" and "tbl_diff" ==================
@@ -687,12 +996,12 @@ opus_read_raw <- function(
       wavenumbers[["ScRf"]]} else {NULL}
   )
 
-  # Print message that file was read if option is set
-  if (print_progress == TRUE) {
-    message(
-      paste0("Extracted spectra data from file: <", file_name_nopath, ">")
-    )
-  }
+  # # Print message that file was read if option is set
+  # if (print_progress == TRUE) {
+  #   message(
+  #     paste0("Extracted spectra data from file: <", file_name_nopath, ">")
+  #   )
+  # }
 
   # Return spectra data and metadata contained as elements in list out
   out
