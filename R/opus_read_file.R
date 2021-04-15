@@ -10,15 +10,15 @@
 #' expressed in absorbance (named \code{AB} in Bruker OPUS programs). Possible
 #' additional values for the character vector supplied to extract are
 #' \code{"ScSm"} (single channel spectrum of the sample measurement), \
-#' code{"ScRf"} (single channel spectrum of the reference measurment),
-#' \code{"IgSm"} (interferogram of the sample measurment) and \code{"IgRf"}
+#' code{"ScRf"} (single channel spectrum of the reference measurement),
+#' \code{"IgSm"} (interferogram of the sample measurement) and \code{"IgRf"}
 #' (interferogram of the reference measurement).
 #' @param print_progress Logical (default \code{TRUE}) whether a message is
 #' printed when an OPUS binary file is parsed into an R list entry.
 #' @param atm_comp_minus4offset Logical whether spectra after atmospheric
 #' compensation are read with an offset of \code{-4} bites from Bruker OPUS
 #' files. Default is \code{FALSE}.
-#' @usage read_opus_bin_univ(file_path, extract = c("spc"),
+#' @usage opus_read(file_path, extract = c("spc"),
 #' print_progress = TRUE, atm_comp_minus4offset = FALSE)
 # Importing functions `%do%` and foreach::`%dopar%` does not work, see
 # http://stackoverflow.com/questions/30216613/how-to-use-dopar-when-only-import-foreach-in-description-of-a-package
@@ -30,7 +30,7 @@
 #'
 #' @author Philipp Baumann
 #'
-opus_read_file <- function(
+opus_read <- function(
   file_path,
   extract = c("spc"),
   print_progress = TRUE,

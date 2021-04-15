@@ -20,6 +20,7 @@
 #' files. Default is \code{FALSE}.
 #'
 #' @importFrom foreach %dopar% %do%
+#' @importFrom stats setNames
 #' @export
 #'
 #' @author Philipp Baumann
