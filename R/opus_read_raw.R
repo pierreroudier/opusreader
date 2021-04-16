@@ -430,10 +430,18 @@ opus_read_raw <- function(
     'Sc' = Sc_assigned,
     'AB' = AB_assigned
   )
+
   # Transpose spectra assignment list, first remove NULL elements in list
-  list_assigned_t <- purrr::transpose(
+  .base_transpose <- function(l) do.call(Map, c(f = list, l)) # to avioid bringing purrr::transpose
+
+  # list_assigned_t <- purrr::transpose(
+  #   Filter(Negate(function(x) is.null(unlist(x))), list_assigned)
+  # )
+
+  list_assigned_t <- .base_transpose(
     Filter(Negate(function(x) is.null(unlist(x))), list_assigned)
   )
+
   # Save spectra index (spc_idx) and spectra code (spc_code)
   # in character vector
   spc_idx <- unlist(list_assigned_t[["spc_idx"]])
@@ -623,7 +631,8 @@ opus_read_raw <- function(
     size = 1,
     endian = "little"
   )[[1]][1]
-  BMS <- stringr::str_split(BMS, "\\,")[[1]][1] # to be replaced with base stuff
+  # BMS <- stringr::str_split(BMS, "\\,")[[1]][1] # to be replaced with base stuff
+  BMS <- unlist(strsplit(BMS, ",", useBytes = TRUE))[1] # to be replaced with base stuff
 
   # Fourier transform parameters ---------------------------------------------
   zff <- grepRaw("ZFF", pr, all = TRUE)[1] + 5 # Zero filling factor (numeric)
@@ -846,7 +855,8 @@ opus_read_raw <- function(
         size = 1,
         endian = "little"
       )[1]
-      stringr::str_split(res, "\\,")[[1]][1]
+      # stringr::str_split(res, "\\,")[[1]][1]
+      unlist(strsplit(res, ",", useBytes = TRUE))[1]
     }
   )
 
@@ -913,7 +923,7 @@ opus_read_raw <- function(
   # # Extract sample repetition number (rep_no) from file name
   # rep_no <- sub(".+\\.([[:digit:]])+$", "\\1", file_path)
 
-  sample_id <- unlist(strsplit(SNM, ";"))[1]
+  sample_id <- unlist(strsplit(SNM, ";", useBytes = TRUE))[1]
   rep_no <- NA
   file_name_nopath <- NA
 
@@ -932,12 +942,13 @@ opus_read_raw <- function(
     ) %do% {
       colnames(spc_m[[i]]) <- round(wavenumbers[[i]], 1)
       rownames(spc_m[[i]]) <- unique_id
-      data.table::as.data.table(spc_m[[i]])
+      # data.table::as.data.table(spc_m[[i]])
+      spc_m[[i]]
     }
 
   # Save all relevant data parameters (metadata)
-  # in tibble data frame (class "data.frame" and "tbl_diff" ==================
-  metadata <- tibble::tibble(
+  # metadata <- tibble::tibble(
+  metadata <- data.frame(
     unique_id = unique_id,
     file_id = file_name_nopath, # pb (20170514): changed `scan_id` to `file_id`
     sample_id = sample_id,
@@ -950,9 +961,13 @@ opus_read_raw <- function(
     # Result spectrum; e.g. "AB" = Absorbance
     # result_spc = ifelse(length(unique(PLF)) == 1, unique(PLF), unique(PLF)[2]),
     # // pb: 2019-11-19: allow NULL value for PLF
-    result_spc <- if (length(unique(PLF)) == 1) {
-      unique(PLF)} else if (length(unique(PLF)) > 1) {
-        unique(PLF)[2]} else { NA },
+    result_spc = if (length(unique(PLF)) == 1) {
+        unique(PLF)
+      } else if (length(unique(PLF)) > 1) {
+        unique(PLF)[2]
+      } else {
+        NA
+      },
     beamspl = BMS,
     laser_wn = LWN,
     # `spc_in_file`: character vector of spectra found in OPUS file

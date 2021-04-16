@@ -30,8 +30,4 @@ Collate:
     'opusreader.R'
     'data.R'
 Imports: 
-    foreach,
-    data.table,
-    purrr,
-    stringr,
-    tibble
+    foreach
