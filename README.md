@@ -17,7 +17,7 @@ This package is a very simple fork from the `read_opus_bin_univ` from [the `simp
 
 You can use the `remotes` package to install `opusreader`:
 
-`devtools::install_github("pierreroudier/opusreader")`
+`remotes::install_github("pierreroudier/opusreader")`
 
 ## Basic usage
 
