@@ -898,6 +898,9 @@ opus_read_raw <- function(
   )[1]
 
 
+  # Close connection
+  close(con)
+
   # == sample ID ==
 
   # # File name
@@ -975,38 +978,50 @@ opus_read_raw <- function(
   )
 
   ## Allocate and return data from spectra in output list (out) ==============
+
   out <- list(
+    # Metadata
     'metadata' = metadata,
     'spc' = spc_m[["spc"]],
-    'spc_nocomp' = if ("spc_nocomp" %in% extract &&
-                       "spc_nocomp" %in% names(spc_m)) {
-      spc_m[["spc_nocomp"]]} else {NULL},
+    'spc_nocomp' = if ("spc_nocomp" %in% extract && "spc_nocomp" %in% names(spc_m)) {
+      spc_m[["spc_nocomp"]]
+    } else {
+      NULL
+    },
     'sc_sm' = if ("ScSm" %in% extract && "ScSm" %in% names(spc_m)) {
-      spc_m[["ScSm"]]} else {NULL},
+      spc_m[["ScSm"]]
+    } else {
+      NULL
+    },
     'sc_rf' = if ("ScRf" %in% extract && "ScRf" %in% names(spc_m)) {
-      spc_m[["ScRf"]]} else {NULL},
+      spc_m[["ScRf"]]
+    } else {
+      NULL
+    },
     'ig_sm' = if ("IgSm" %in% extract && "IgSm" %in% names(spc_m)) {
-      spc_m[["IgSm"]]} else {NULL},
+      spc_m[["IgSm"]]
+    } else {
+      NULL
+    },
     'ig_rf' = if ("IgRf" %in% extract && "IgRf" %in% names(spc_m)) {
-      spc_m[["IgRf"]]} else {NULL},
+      spc_m[["IgRf"]]
+    } else {
+      NULL
+    },
     # Wavenumbers of final AB spectra
     wavenumbers = wavenumbers[["spc"]],
     wavenumbers_sc_sm = if ("ScSm" %in% extract) {
-      wavenumbers[["ScSm"]]} else {NULL},
+      wavenumbers[["ScSm"]]
+    } else {
+      NULL
+    },
     wavenumbers_sc_rf = if ("ScRf" %in% extract) {
-      wavenumbers[["ScRf"]]} else {NULL}
+      wavenumbers[["ScRf"]]
+    } else {
+      NULL
+    }
   )
 
-  # # Print message that file was read if option is set
-  # if (print_progress == TRUE) {
-  #   message(
-  #     paste0("Extracted spectra data from file: <", file_name_nopath, ">")
-  #   )
-  # }
-
-  # Close connection
-  close(con)
-
   # Return spectra data and metadata contained as elements in list out
-  out
+  return(out)
 }
