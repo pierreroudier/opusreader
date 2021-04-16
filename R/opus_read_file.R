@@ -25,7 +25,6 @@
 # Got the following error:
 # "Error : object '`%do%`' is not exported by 'namespace:foreach'"
 #' @include opus_read_raw.R
-#' @importFrom hexView readRaw
 #' @export
 #'
 #' @author Philipp Baumann
@@ -46,14 +45,9 @@ opus_read <- function(
     # file_path <- "data/soilspec_background/yamsys_bg_gold/BF_lo_15_soil_cal.0"
     # Read entire content of file as bytes
 
-    pa <- hexView::readRaw(file_path, offset = 0,
-                           nbytes = file.info(file_path)$size, human = "char",
-                           size = 1, endian = "little")
-
     # Get raw vector
-    pr <- pa$fileRaw
-
-    out <- opus_read_raw(pr)
+    rw <- readBin(file_path, "raw", 10e9)
+    out <- opus_read_raw(rw)
 
     return(out)
   }) # closes try() function
