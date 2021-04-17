@@ -3,6 +3,4 @@
 export(opus_file)
 export(opus_read)
 export(opus_read_raw)
-importFrom(foreach,"%do%")
-importFrom(foreach,"%dopar%")
 importFrom(stats,setNames)
