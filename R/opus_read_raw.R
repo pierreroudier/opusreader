@@ -19,7 +19,6 @@
 #' compensation are read with an offset of \code{-4} bites from Bruker OPUS
 #' files. Default is \code{FALSE}.
 #'
-#' @importFrom foreach %dopar% %do%
 #' @importFrom stats setNames
 #' @export
 #'
@@ -36,7 +35,7 @@ opus_read_raw <- function(
   x <- y <- i <- npt <- NULL
 
   # Read byte positions for selected 3 letter strings that flag important
-  # spectral information -----------------------------------------------------
+  # spectral information -------------------------------------------------------
 
   # Get positions of "END" strings
   end <- grepRaw("END", pr, all = TRUE) + 11
@@ -54,18 +53,18 @@ opus_read_raw <- function(
   # the wavenumbers; The below code is a quick and dirty fix to remove
   # FXV values that don't have LXV values and vice versa
   # (difference between "LXV" and "FXV" for a spectral data block
-  # should be 16) ------------------------------------------------------------
+  # should be 16) --------------------------------------------------------------
   if (length(fxv_all) > length(lxv_all)) {
     diff_lxv_fxv <- lapply(lxv_all, function(x) x - fxv_all)
     # Return list of logical vectors indicating whether difference of fxv
     # and lxv is 16 (distance of 16 bytes)
     lxv_fxv_min <- lapply(diff_lxv_fxv, function(x) x == 16)
     fxv_list <- rep(list(fxv_all), length(fxv_all))
-    fxv_all <- foreach::foreach(
-      x = 1:length(fxv_list), y = 1:length(lxv_fxv_min),
-      .combine = 'c') %do% {
-        fxv_list[[x]][lxv_fxv_min[[y]]]
-      }
+    fxv_all <- mapply(function(x, y) {
+                        fxv_list[[x]][lxv_fxv_min[[y]]]
+                      },
+                      x = seq_along(fxv_list),
+                      y = seq_along(lxv_fxv_min))
   }
 
   if (length(lxv_all) > length(fxv_all)) {
@@ -74,11 +73,12 @@ opus_read_raw <- function(
     # and lxv is 16 (distance of 16 bytes)
     fxv_lxv_min <- lapply(diff_fxv_lxv, function(x) x == -16)
     lxv_list <- rep(list(lxv_all), length(lxv_all))
-    lxv_all <- foreach::foreach(
-      x = 1:length(lxv_list), y = 1:length(fxv_lxv_min),
-      .combine = 'c') %do% {
-        lxv_list[[x]][fxv_lxv_min[[y]]]
-      }
+
+    lxv_all <- mapply(function(x, y) {
+                        lxv_list[[x]][fxv_lxv_min[[y]]]
+                      },
+                      x = seq_along(lxv_list),
+                      y = seq_along(fxv_lxv_min))
   }
 
   # Reduce size of npt_all -----------------------------------------------------
@@ -96,27 +96,27 @@ opus_read_raw <- function(
     npt_all <- npt_all[which_npt_valid]
   }
 
-  # --------------------------------------------------------------------------
+  # ----------------------------------------------------------------------------
 
-  ## Read basic spectral information =========================================
+  ## Read basic spectral information ===========================================
   con <- rawConnection(pr)
 
   # Read all number of points (NPT) at once
-  NPT <- foreach::foreach(npt = npt_all, .combine = 'c') %do% {
-
-    # hexView::readRaw(file_path, offset = npt, nbytes = 12, human = "int", size = 4)[[5]][2]
-    seek(con, npt, origin = "start")
-    readBin(con, what = "integer", n = 12, size = 4)[2]
-  }
+  NPT <- sapply(
+    npt_all,
+    function(npt) {
+      seek(con, npt, origin = "start")
+      readBin(con, what = "integer", n = 12, size = 4)[2]
+    })
 
   # Specific error for file: <"data/soilspec_eth_bin/CI_tb_05_soil_cal.2">
   # "Invalid number of bytes" when trying to read spectra
   # -> Reason: NPT at position 1 is 995236000 !!!
   # Omit this entry in NPT and corresponding byte position in npt_all
-  # Quick fix ----------------------------------------------------------------
+  # Quick fix ------------------------------------------------------------------
   npt_all <- npt_all[NPT < 40000]
   NPT <- NPT[NPT < 40000]
-  # --------------------------------------------------------------------------
+  # ----------------------------------------------------------------------------
 
   # Figure out how many spectral blocks exist and select final spectra
   # positions; end_spc is vector of offsets where spectra start
@@ -127,7 +127,7 @@ opus_read_raw <- function(
   }
 
   ## Find final spectra information block positions
-  ## that belong to spectra data =============================================
+  ## that belong to spectra data ===============================================
 
   # Save positions that contain possible spectra data block
   # standard parameters
@@ -141,7 +141,7 @@ opus_read_raw <- function(
   ## spectra, elements are npt (number of points),
   ## fxv (frequency of first point) and lxv (frequency of last point);
   ## returned values represent byte positions in the file where spectra
-  ## parameters are stored. --------------------------------------------------
+  ## parameters are stored. ----------------------------------------------------
   return_spc_param <- function(end_spc, spc_param_list) {
 
     # Difference between any NPT position vector elements end_spc element
@@ -154,7 +154,11 @@ opus_read_raw <- function(
     # Find minimum positive difference within each list
     if (length(diff_l) == 1) {sel_min <- list(TRUE)} else {
       sel_min <- lapply(diff_l,
-                        function(x) {if (any(x > 0)) {x == min(x[x > 0])} else {x == -164}})
+                        function(x) {
+                          if (any(x > 0)) {
+                            x == min(x[x > 0])
+                          } else {x == -164}
+                        })
     }
     # Set FALSE repeated vector in sel_min element where TRUE positions are
     # duplicated
@@ -172,11 +176,17 @@ opus_read_raw <- function(
 
     # Select spectra parameters that immediately follow END positions before
     # corresponding spectra
-    param_min <- foreach::foreach(i = 1:length(spc_param_list),
-                                  .final = function(i) setNames(i, names(spc_param_list))) %do% {
-                                    Map(function(x, y) x[y],
-                                        rep(list(spc_param_list[[i]]), length(end_spc)), sel_min)
-                                  }
+    param_min <- setNames(
+      lapply(
+        seq_along(spc_param_list),
+        function(i) {
+          Map(function(x, y) x[y],
+              rep(list(spc_param_list[[i]]), length(end_spc)),
+                  sel_min)
+        }
+      ),
+      names(spc_param_list)
+    )
 
     # Test if any difference in list is -164
     if (any(unlist(isminus164) == TRUE)) {
@@ -190,12 +200,17 @@ opus_read_raw <- function(
                                 right = TRUE)
       # Replace positions in parameter list are at positions of last
       # -164 difference between end_spc element and NPT position
-      param_min <- foreach::foreach(i = 1:length(spc_param_list),
-                                    .final = function(i) setNames(i, names(spc_param_list))) %do% {
-                                      param_min[[i]][[last_minus164]] <-
-                                        spc_param_list[[i]][isminus164[[last_minus164]]]
-                                      param_min[[i]]
-                                    }
+      param_min <- setNames(
+        lapply(
+          seq_along(spc_param_list),
+          function(i) {
+            param_min[[i]][[last_minus164]] <-
+              spc_param_list[[i]][isminus164[[last_minus164]]]
+              param_min[[i]]
+          }
+        ),
+        names(spc_param_list)
+      )
     }
     # Return list of final parameters corresponding to data blocks that
     # contain spectra
@@ -212,20 +227,17 @@ opus_read_raw <- function(
   lxv_spc <- param_spc[["lxv"]]
   end_spc <- param_spc[["end_spc"]]
 
-  # Read number of points corresponding to spectra in file -------------------
-
-  NPT_spc <- foreach::foreach(i = 1:length(npt_spc), .combine = 'c') %do% {
-
-    # hexView::readRaw(file_path, offset = npt_spc[i], nbytes = 12, human = "int", size = 4)[[5]][2]
-
-    seek(con, npt_spc[i], origin = "start")
-    readBin(con, what = "integer", n = 12, size = 4)[2]
-  }
+  # Read number of points corresponding to spectra in file ---------------------
+  NPT_spc <- sapply(seq_along(npt_spc),
+                    function(i) {
+                      seek(con, npt_spc[i], origin = "start")
+                      readBin(con, what = "integer", n = 12, size = 4)[2]
+                    })
 
   # Delete NPT with negative signs
   NPT_spc <- NPT_spc[NPT_spc > 0]
 
-  ## Read all spectra ========================================================
+  ## Read all spectra ==========================================================
 
   spc <- Map(
     function(end, NPT) {
@@ -248,31 +260,33 @@ opus_read_raw <- function(
     NPT_spc
   )
 
-  # Read FXV and LXV and calculate wavenumbers  ------------------------------
+  # Read FXV and LXV and calculate wavenumbers  --------------------------------
 
-  FXV_spc <- foreach::foreach(i = 1:length(fxv_spc), .combine = 'c') %do% {
+  FXV_spc <- sapply(
+    fxv_spc,
+    function(fxv_spc) {
+      seek(con, fxv_spc, origin = "start")
+      readBin(con, what = "numeric", n = 16, size = 8)[1]
+    }
+  )
 
-    # hexView::readRaw(file_path, offset = fxv_spc[i], nbytes = 16, human = "real", size = 8)[[5]][1]
-
-    seek(con, fxv_spc[i], origin = "start")
-    readBin(con, what = "numeric", n = 16, size = 8)[1]
-
-  }
-
-  LXV_spc <- foreach::foreach(i = 1:length(lxv_spc), .combine = 'c') %do% {
-
-    # hexView::readRaw(file_path, offset = lxv_spc[i], nbytes = 16, human = "real", size = 8)[[5]][1]
-
-    seek(con, lxv_spc[i], origin = "start")
-    readBin(con, what = "numeric", n = 16, size = 8)[1]
-  }
+  LXV_spc <- sapply(
+    lxv_spc,
+    function(lxv_spc) {
+      seek(con, lxv_spc, origin = "start")
+      readBin(con, what = "numeric", n = 16, size = 8)[1]
+    }
+  )
 
   # Calculate wavenumbers
-  wavenumbers <- foreach::foreach(i = 1:length(FXV_spc)) %do% {
-    rev(seq(LXV_spc[i], FXV_spc[i], (FXV_spc[i] - LXV_spc[i]) / (NPT_spc[i] - 1)))
-  }
+  wavenumbers <- lapply(
+    seq_along(FXV_spc),
+    function(i) {
+      rev(seq(LXV_spc[i], FXV_spc[i], (FXV_spc[i] - LXV_spc[i]) / (NPT_spc[i] - 1)))
+    }
+  )
 
-  ## Assigning list of intially read spectra depending on block type =========
+  ## Assigning list of intially read spectra depending on block type ===========
 
   # Assign an index name to the spectra and parameters for reading
   names(end_spc) <- paste0("idx", 1:length(end_spc))
@@ -282,7 +296,7 @@ opus_read_raw <- function(
   names(wavenumbers) <- paste0("idx", 1:length(wavenumbers))
 
   # Check if elements in FXV_spc (frequency of first point) are equal to 0;
-  # these are interferogram spectra ------------------------------------------
+  # these are interferogram spectra --------------------------------------------
   which_Ig <- FXV_spc[which(FXV_spc == 0)]
   Ig_assigned <- if (length(which_Ig) == 0) {
     NULL
@@ -322,7 +336,7 @@ opus_read_raw <- function(
     wavenumbers[na_assigned$spc_idx] <- NULL
   }
 
-  # Assign single channel spectra if present in file -------------------------
+  # Assign single channel spectra if present in file ---------------------------
 
   # Return idx (index names) of all remaining spectra that are not
   # interferograms
@@ -331,8 +345,10 @@ opus_read_raw <- function(
 
   # Check if the MIR range was measured
   wavenumbers_mir <- lapply(names(wavenumbers[notIg]),
-                            function(i) spc[[i]][wavenumbers[notIg][[i]] < 2392 &
-                                                   wavenumbers[notIg][[i]] > 2358])
+                            function(i) {
+                              spc[[i]][wavenumbers[notIg][[i]] < 2392 &
+                                       wavenumbers[notIg][[i]] > 2358]
+                            })
   is_mir <- any(sapply(wavenumbers_mir, function(x) length(x) != 0))
 
   if (isTRUE(is_mir)) {
@@ -340,8 +356,10 @@ opus_read_raw <- function(
     # and 2358 cm^(-1)
     peak_ratio <- lapply(
       lapply(names(wavenumbers[notIg]),
-             function(i) spc[[i]][wavenumbers[notIg][[i]] < 2392 &
-                                    wavenumbers[notIg][[i]] > 2358]),
+             function(i) {
+               spc[[i]][wavenumbers[notIg][[i]] < 2392 &
+                        wavenumbers[notIg][[i]] > 2358]
+             }),
       function(j) j[[1]] / j[[length(j)]]
     )
     names(peak_ratio) <- names(spc[notIg])
@@ -374,7 +392,7 @@ opus_read_raw <- function(
       spc_code = c("ScSm", "ScRf")
     )
   }
-  # Assign corrected and uncorrected (if present) ----------------------------
+  # Assign corrected and uncorrected (if present) ------------------------------
   # AB spectra list
   which_AB <- names(spc)[!names(spc) %in%
                            c(Ig_assigned[["spc_idx"]], na_assigned[["spc_idx"]],
@@ -398,7 +416,7 @@ opus_read_raw <- function(
   # versions do still need the same offset end_spc[[spc_idx]] - 4 as the other
   # spectra types; new argument atm_comp_minus4offset (default FALSE) is a
   # quick fix to read files with different offsets after atmospheric
-  # compensation -------------------------------------------------------------
+  # compensation ---------------------------------------------------------------
   if (length(which_AB) == 2 && !atm_comp_minus4offset) {
 
     # spc[[which_AB[length(which_AB)]]] <- hexView::readRaw(
@@ -423,7 +441,7 @@ opus_read_raw <- function(
 
   }
 
-  # Assign spectra type for final spectra in element names of spc list -------
+  # Assign spectra type for final spectra in element names of spc list ---------
   # Combine spectral assignments lists
   list_assigned <- list(
     'Ig' = Ig_assigned,
@@ -432,12 +450,13 @@ opus_read_raw <- function(
   )
 
   # Transpose spectra assignment list, first remove NULL elements in list
-  .base_transpose <- function(l) do.call(Map, c(f = list, l)) # to avioid bringing purrr::transpose
+  # https://stackoverflow.com/questions/54970592/how-to-transpose-a-list-of-vectors
+  .base_transpose <- function(l) do.call(Map, c(f = list, l)) # to avoid bringing purrr::transpose
 
   # list_assigned_t <- purrr::transpose(
   #   Filter(Negate(function(x) is.null(unlist(x))), list_assigned)
   # )
-
+ 
   list_assigned_t <- .base_transpose(
     Filter(Negate(function(x) is.null(unlist(x))), list_assigned)
   )
@@ -480,9 +499,9 @@ opus_read_raw <- function(
     )
   }
 
-  ## Get additional parameters from OPUS binary file =========================
+  ## Get additional parameters from OPUS binary file ===========================
 
-  # Instrument parameters ----------------------------------------------------
+  # Instrument parameters ------------------------------------------------------
 
   ins <- grepRaw("INS", pr, all = TRUE) # Instrument type
 
@@ -583,7 +602,7 @@ opus_read_raw <- function(
 
     })
 
-  # Optics parameters --------------------------------------------------------
+  # Optics parameters ----------------------------------------------------------
 
   src <- grepRaw("SRC", pr, all = TRUE) # Source: MIR or NIR
 
@@ -634,7 +653,7 @@ opus_read_raw <- function(
   # BMS <- stringr::str_split(BMS, "\\,")[[1]][1] # to be replaced with base stuff
   BMS <- unlist(strsplit(BMS, ",", useBytes = TRUE))[1] # to be replaced with base stuff
 
-  # Fourier transform parameters ---------------------------------------------
+  # Fourier transform parameters -----------------------------------------------
   zff <- grepRaw("ZFF", pr, all = TRUE)[1] + 5 # Zero filling factor (numeric)
 
   # ZFF <- hexView::readRaw(
@@ -654,7 +673,7 @@ opus_read_raw <- function(
     endian = "little"
   )[1]
 
-  # (Additional) Standard parameters -----------------------------------------
+  # (Additional) Standard parameters -------------------------------------------
 
   csf_all <- grepRaw("CSF", pr, all = TRUE) + 7 # y-scaling factor
 
@@ -739,7 +758,7 @@ opus_read_raw <- function(
     }
   )
 
-  # Y units -> there is no DYU present in file
+  # Y units -> PR: there is no DYU present in file -> PB: yes, but there is in others
   dyu_all <- grepRaw("DYU", pr, all = TRUE) + 7
   dat <- grepRaw("DAT", pr, all = TRUE) + 7 # Date
 
@@ -774,10 +793,11 @@ opus_read_raw <- function(
   )
 
   # Only select "DAT" string positions that are immediately before time
-  dat_sel <- foreach::foreach(i = 1:length(tim), .combine = 'c') %do% {
-    diff_sel <- dat - tim[i]
-    dat[which(diff_sel <= 32 & diff_sel >= -20)]
-  }
+  dat_sel <- sapply(seq_along(tim),
+                    function(i) {
+                      diff_sel <- dat - tim[i]
+                      dat[which(diff_sel <= 32 & diff_sel >= -20)]
+                    })
 
   date <- lapply(
     dat_sel,
@@ -812,7 +832,7 @@ opus_read_raw <- function(
   # , tz = "GMT+1") # tz is argument for time zone
 
   # Scale all spectra with y-scaling factor if any of spectra types present
-  # in file are not 1 --------------------------------------------------------
+  # in file are not 1 ----------------------------------------------------------
   # Set names of CSF elements equal to spectra list element names
   names(CSF) <- names(spc)
 
@@ -828,7 +848,7 @@ opus_read_raw <- function(
     spc <- replace(x = spc, list = names(CSF_toscale), values = spc_scaled)
   }
 
-  # Data acquisition parameters -----------------------------------------------
+  # Data acquisition parameters ------------------------------------------------
 
   plf <- grepRaw("PLF", pr, all = TRUE) + 4 # Result spectrum
 
@@ -883,7 +903,7 @@ opus_read_raw <- function(
     endian = "little"
   )[1]
 
-  ## Create sample metadata objects ==========================================
+  ## Create sample metadata objects ============================================
 
   snm <- grepRaw("SNM", pr, all = TRUE)[1] + 7
 
@@ -932,19 +952,22 @@ opus_read_raw <- function(
   ymdhms_id <- max(date_time)
   unique_id <- paste0(sample_id, "_", ymdhms_id)
 
-  ## Convert all spectra in list spc into a matrix of 1 row ==================
+  ## Convert all spectra in list spc into a matrix of 1 row ====================
   spc_m <- lapply(spc, function(x) matrix(x, ncol = length(x), byrow = FALSE))
 
   # Add dimnames (wavenumbers for columns and unique_id for rows
-  spc_m <- foreach::foreach(
-    i = 1:length(spc_m),
-    .final = function(i) setNames(i, names(spc_m))
-    ) %do% {
-      colnames(spc_m[[i]]) <- round(wavenumbers[[i]], 1)
-      rownames(spc_m[[i]]) <- unique_id
-      # data.table::as.data.table(spc_m[[i]])
-      spc_m[[i]]
-    }
+  spc_m <- setNames(
+    lapply(
+      seq_along(spc_m),
+      function(i) {
+        colnames(spc_m[[i]]) <- round(wavenumbers[[i]], 1)
+        rownames(spc_m[[i]]) <- unique_id
+        # data.table::as.data.table(spc_m[[i]])
+        spc_m[[i]]
+      }
+    ),
+    names(spc_m)
+  )
 
   # Save all relevant data parameters (metadata)
   # metadata <- tibble::tibble(
@@ -992,7 +1015,7 @@ opus_read_raw <- function(
                         HUM_abs[[1]]) # reference measurement
   )
 
-  ## Allocate and return data from spectra in output list (out) ==============
+  ## Allocate and return data from spectra in output list (out) ================
 
   out <- list(
     # Metadata
