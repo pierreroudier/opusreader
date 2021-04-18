@@ -20,10 +20,6 @@
 #' files. Default is \code{FALSE}.
 #' @usage opus_read(file_path, extract = c("spc"),
 #' print_progress = TRUE, atm_comp_minus4offset = FALSE)
-# Importing functions `%do%` and foreach::`%dopar%` does not work, see
-# http://stackoverflow.com/questions/30216613/how-to-use-dopar-when-only-import-foreach-in-description-of-a-package
-# Got the following error:
-# "Error : object '`%do%`' is not exported by 'namespace:foreach'"
 #' @include opus_read_raw.R
 #' @export
 #'
