@@ -116,6 +116,7 @@ opus_read_raw <- function(
   # Quick fix ------------------------------------------------------------------
   npt_all <- npt_all[NPT < 40000]
   NPT <- NPT[NPT < 40000]
+
   # ----------------------------------------------------------------------------
 
   # Figure out how many spectral blocks exist and select final spectra
@@ -160,6 +161,7 @@ opus_read_raw <- function(
                           } else {x == -164}
                         })
     }
+
     # Set FALSE repeated vector in sel_min element where TRUE positions are
     # duplicated
     which_elem_dupl <- which(duplicated(sapply(sel_min, which)))
@@ -218,6 +220,7 @@ opus_read_raw <- function(
     param_spc$end_spc <- end_spc
     param_spc
   }
+
   # Save spectra parameter list
   param_spc <- return_spc_param(end_spc, spc_param_list)
 
@@ -241,20 +244,8 @@ opus_read_raw <- function(
 
   spc <- Map(
     function(end, NPT) {
-
-      # hexView::readRaw(
-      #   file_path,
-      #   width = NULL,
-      #   offset = end - 4,
-      #   nbytes = NPT * 4,
-      #   human = "real",
-      #   size = 4,
-      #   endian = "little"
-      # )[[5]]
-
       seek(con, end - 4, origin = "start", rw = "read")
       readBin(con, what = "numeric", n = NPT, size = 4, endian = "little")
-
     },
     end_spc,
     NPT_spc
@@ -392,6 +383,7 @@ opus_read_raw <- function(
       spc_code = c("ScSm", "ScRf")
     )
   }
+
   # Assign corrected and uncorrected (if present) ------------------------------
   # AB spectra list
   which_AB <- names(spc)[!names(spc) %in%
@@ -418,17 +410,6 @@ opus_read_raw <- function(
   # quick fix to read files with different offsets after atmospheric
   # compensation ---------------------------------------------------------------
   if (length(which_AB) == 2 && !atm_comp_minus4offset) {
-
-    # spc[[which_AB[length(which_AB)]]] <- hexView::readRaw(
-    #   file_path,
-    #   width = NULL,
-    #   offset = end_spc[which_AB[length(which_AB)]],
-    #   nbytes = NPT_spc[which_AB[length(which_AB)]] * 4,
-    #   human = "real",
-    #   size = 4,
-    #   endian = "little"
-    # )[[5]]
-
     seek(con, end_spc[which_AB[length(which_AB)]], origin = "start", rw = "read")
     spc[[which_AB[length(which_AB)]]] <- readBin(
       con,
@@ -453,10 +434,6 @@ opus_read_raw <- function(
   # https://stackoverflow.com/questions/54970592/how-to-transpose-a-list-of-vectors
   .base_transpose <- function(l) do.call(Map, c(f = list, l)) # to avoid bringing purrr::transpose
 
-  # list_assigned_t <- purrr::transpose(
-  #   Filter(Negate(function(x) is.null(unlist(x))), list_assigned)
-  # )
-
   list_assigned_t <- .base_transpose(
     Filter(Negate(function(x) is.null(unlist(x))), list_assigned)
   )
@@ -465,29 +442,21 @@ opus_read_raw <- function(
   # in character vector
   spc_idx <- unlist(list_assigned_t[["spc_idx"]])
   spc_code <- unlist(list_assigned_t[["spc_code"]])
+
   # Order spc_idx from 1 to n spectra (n = length of end_spc)
   order_spc <- as.numeric(
     sub(".*idx", "", unlist(list_assigned_t[["spc_idx"]])))
   spc_type <- spc_code[order(order_spc)]
+
   # Set spectrum type as element names of spectra list (spc)
   names(spc) <- spc_type
+
   # Set spectrum type in wavenumbers list
   names(wavenumbers) <- spc_type
 
   # Read with new offset when first value of
   # ScSm  single channel sample spectrumspectrum is 0 and replace previous ---
   if (any(names(spc) %in% "ScSm" & spc[["ScSm"]][1] == 0)) {
-
-    # spc[["ScSm"]] <- hexView::readRaw(
-    #   file_path,
-    #   width = NULL,
-    #   offset = end_spc[Sc_assigned$spc_idx[Sc_assigned$spc_code == "ScSm"]],
-    #   nbytes = NPT_spc[Sc_assigned$spc_idx[Sc_assigned$spc_code == "ScSm"]] * 4,
-    #   human = "real",
-    #   size = 4,
-    #   endian = "little"
-    # )[[5]]
-
     seek(con, end_spc[Sc_assigned$spc_idx[Sc_assigned$spc_code == "ScSm"]], origin = "start", rw = "read")
     spc[["ScSm"]] <- readBin(
       con,
@@ -504,13 +473,6 @@ opus_read_raw <- function(
   # Instrument parameters ------------------------------------------------------
 
   ins <- grepRaw("INS", pr, all = TRUE) # Instrument type
-
-  # INS <- hexView::blockString(
-  #   hexView::readRaw(
-  #     file_path, offset = ins[length(ins)] + 7,
-  #     nbytes = 10, human = "char", size = 1, endian = "little")
-  #   )
-
   seek(con, ins[length(ins)] + 7, origin = "start", rw = "read")
   INS <- readBin(
     con,
@@ -521,8 +483,6 @@ opus_read_raw <- function(
   )[1]
 
   lwn <- grepRaw("LWN", pr, all = TRUE)[1] + 7 # Laser wavenumber
-
-  # LWN <- hexView::readRaw(file_path, offset = lwn, nbytes = 8, human = "real", size=8)[[5]][1]
   seek(con, lwn, origin = "start", rw = "read")
   LWN <- readBin(
     con,
@@ -532,16 +492,7 @@ opus_read_raw <- function(
   )[1]
 
   tsc <- grepRaw("TSC", pr, all = TRUE) + 7 # Scanner temperature
-
   TSC_all <- lapply(tsc, function(tsc) {
-
-    # hexView::readRaw(
-    #   file_path,
-    #   offset = tsc,
-    #   nbytes = 16,
-    #   human = "real",
-    #   size = 8
-    # )[[5]][[1]] # can include sample and background temperature
     seek(con, tsc, origin = "start", rw = "read")
     readBin(
       con,
@@ -553,20 +504,10 @@ opus_read_raw <- function(
 
   # Read relative humidity of the interferometer during measurement
   hum_rel <- grepRaw("HUM", pr, all = TRUE) + 7
-
   HUM_rel <- lapply(
     hum_rel,
     function(hum_rel) {
       # can include sample and background humidity
-
-      # hexView::readRaw(
-      #   file_path,
-      #   offset = hum_rel,
-      #   nbytes = 16,
-      #   human = "int",
-      #   size = 8
-      # )[[5]][[1]]
-
       seek(con, hum_rel, origin = "start", rw = "read")
       readBin(
         con,
@@ -578,20 +519,10 @@ opus_read_raw <- function(
 
   # Read absolute humidity of the interferometer during measurement
   hum_abs <- grepRaw("HUA", pr, all = TRUE) + 7
-
   HUM_abs <- lapply(
     hum_abs,
     function(hum_abs) {
       # can include sample and background humidity
-
-      # hexView::readRaw(
-      #   file_path,
-      #   offset = hum_abs,
-      #   nbytes = 16,
-      #   human = "real",
-      #   size = 8
-      # )[[5]][[1]]
-
       seek(con, hum_abs, origin = "start", rw = "read")
       readBin(
         con,
@@ -599,23 +530,11 @@ opus_read_raw <- function(
         n = 16,
         size = 8
       )[[1]]
-
     })
 
   # Optics parameters ----------------------------------------------------------
 
   src <- grepRaw("SRC", pr, all = TRUE) # Source: MIR or NIR
-
-  # SRC <- hexView::blockString(
-  #   hexView::readRaw(
-  #     file_path,
-  #     offset = src[length(src)] + 4,
-  #     nbytes = 3,
-  #     human = "char",
-  #     size = 1,
-  #     endian = "little"
-  #   )
-  # )
   seek(con, src[length(src)] + 4, origin = "start", rw = "read")
   SRC <- readBin(
     con,
@@ -629,19 +548,6 @@ opus_read_raw <- function(
   instr_range <- tolower(paste(INS, SRC, sep = "-"))
 
   bms <- grepRaw("BMS", pr, all = TRUE) # Beamsplitter
-
-
-  # BMS <- hexView::blockString(
-  #   hexView::readRaw(
-  #     file_path,
-  #     offset = bms[length(bms)] + 4,
-  #     nbytes = 3,
-  #     human = "char",
-  #     size = 1,
-  #     endian = "little"
-  #   )
-  # )
-  #
   seek(con, bms[length(bms)] + 4, origin = "start", rw = "read")
   BMS <- readBin(
     con,
@@ -650,20 +556,10 @@ opus_read_raw <- function(
     size = 1,
     endian = "little"
   )[[1]][1]
-  # BMS <- stringr::str_split(BMS, "\\,")[[1]][1] # to be replaced with base stuff
-  BMS <- unlist(strsplit(BMS, ",", useBytes = TRUE))[1] # to be replaced with base stuff
+  BMS <- unlist(strsplit(BMS, ",", useBytes = TRUE))[1]
 
   # Fourier transform parameters -----------------------------------------------
   zff <- grepRaw("ZFF", pr, all = TRUE)[1] + 5 # Zero filling factor (numeric)
-
-  # ZFF <- hexView::readRaw(
-  #   file_path,
-  #   offset = zff,
-  #   nbytes = 4,
-  #   human = "int",
-  #   size = 2
-  # )[[5]][1]
-
   seek(con, zff, origin = "start", rw = "read")
   ZFF <- readBin(
     con,
@@ -676,20 +572,10 @@ opus_read_raw <- function(
   # (Additional) Standard parameters -------------------------------------------
 
   csf_all <- grepRaw("CSF", pr, all = TRUE) + 7 # y-scaling factor
-
   # Read only CSF byte positions that correspond to final spectra
   CSF <- lapply(
     csf_all[npt_all %in% npt_spc],
     function(csf) {
-
-      # hexView::readRaw(
-      #   file_path,
-      #   offset = csf,
-      #   nbytes = 8,
-      #   human = "real",
-      #   size = 8
-      # )[[5]][1]
-
       seek(con, csf, origin = "start", rw = "read")
       readBin(
         con,
@@ -698,25 +584,13 @@ opus_read_raw <- function(
         size = 8,
         endian = "little"
       )[1]
-
     })
 
-
   mxy_all <- grepRaw("MXY", pr, all = TRUE) + 7 # Y-maximum
-
   MXY <- unlist(
     lapply(
       mxy_all[npt_all %in% npt_spc],
       function(mxy) {
-
-        # hexView::readRaw(
-        #   file_path,
-        #   offset = mxy,
-        #   nbytes = 8,
-        #   human = "real",
-        #   size = 8
-        # )[[5]][1]
-
         seek(con, mxy, origin = "start", rw = "read")
         readBin(
           con,
@@ -731,30 +605,17 @@ opus_read_raw <- function(
   mny <- grepRaw("MNY", pr, all = TRUE) + 7 # Y-minimum
 
   dxu_all <- grepRaw("DXU", pr, all = TRUE) + 7 # X units
-
   DXU <- lapply(
     dxu_all,
     function(dxu) {
-      # hexView::blockString(
-
-        # hexView::readRaw(
-        #   file_path,
-        #   offset = dxu,
-        #   nbytes = 3,
-        #   human = "char",
-        #   size = 1,
-        #   endian = "little"
-        # )
-
-        seek(con, dxu, origin = "start", rw = "read")
-        readBin(
-          con,
-          what = "character",
-          n = 3,
-          size = 1,
-          endian = "little"
-        )[1]
-      # )
+      seek(con, dxu, origin = "start", rw = "read")
+      readBin(
+        con,
+        what = "character",
+        n = 3,
+        size = 1,
+        endian = "little"
+      )[1]
     }
   )
 
@@ -768,18 +629,6 @@ opus_read_raw <- function(
     lapply(
       tim,
       function(tim) {
-
-        # hexView::blockString(
-        #   hexView::readRaw(
-        #     file_path,
-        #     offset = tim,
-        #     nbytes = 22,
-        #     human = "char",
-        #     size = 1,
-        #     endian = "little"
-        #   )
-        # )
-
         seek(con, tim, origin = "start", rw = "read")
         readBin(
           con,
@@ -802,17 +651,6 @@ opus_read_raw <- function(
   date <- lapply(
     dat_sel,
     function(dat) {
-
-      # hexView::blockString(
-      #   hexView::readRaw(
-      #     file_path,
-      #     offset = dat,
-      #     nbytes = 10,
-      #     human = "char",
-      #     size = 1,
-      #     endian = "little"
-      #   )
-      # )
       seek(con, dat, origin = "start", rw = "read")
       readBin(
         con,
@@ -821,7 +659,6 @@ opus_read_raw <- function(
         size = 1,
         endian = "little"
       )[1]
-
     }
   )
 
@@ -851,22 +688,9 @@ opus_read_raw <- function(
   # Data acquisition parameters ------------------------------------------------
 
   plf <- grepRaw("PLF", pr, all = TRUE) + 4 # Result spectrum
-
   PLF_all <- lapply(
     plf,
     function(plf) {
-
-      # hexView::blockString(
-      #   hexView::readRaw(
-      #     file_path,
-      #     offset = plf,
-      #     nbytes = 2,
-      #     human = "char",
-      #     size = 1,
-      #     endian = "little"
-      #   )
-      # )
-
       seek(con, plf, origin = "start", rw = "read")
       res <- readBin(
         con,
@@ -875,7 +699,6 @@ opus_read_raw <- function(
         size = 1,
         endian = "little"
       )[1]
-      # stringr::str_split(res, "\\,")[[1]][1]
       unlist(strsplit(res, ",", useBytes = TRUE))[1]
     }
   )
@@ -885,15 +708,6 @@ opus_read_raw <- function(
   PLF <- unlist(PLF_all[lapply(PLF_all, nchar) > 0])
 
   res <- grepRaw("RES", pr, all = TRUE)[1] + 5 # Resolution (wavenumber)
-
-  # RES <- hexView::readRaw(
-  #   file_path,
-  #   offset = res,
-  #   nbytes = 4,
-  #   human = "int",
-  #   size = 2
-  # )[[5]][1]
-
   seek(con, res, origin = "start", rw = "read")
   RES <- readBin(
     con,
@@ -906,18 +720,6 @@ opus_read_raw <- function(
   ## Create sample metadata objects ============================================
 
   snm <- grepRaw("SNM", pr, all = TRUE)[1] + 7
-
-  # SNM <- hexView::blockString(
-  #   hexView::readRaw(
-  #     file_path,
-  #     offset = snm,
-  #     nbytes = 30,
-  #     human = "char",
-  #     size = 1,
-  #     endian = "little"
-  #   )
-  # )
-
   seek(con, snm, origin = "start", rw = "read")
   SNM <- readBin(
     con,
@@ -927,28 +729,16 @@ opus_read_raw <- function(
     endian = "little"
   )[1]
 
-
   # Close connection
   close(con)
 
   # == sample ID ==
-
-  # # File name
-  # file_name_nopath <- sub(".+/(.+)", "\\1", file_path)
-  #
-  # # Create sample id from file name;
-  # # remove extension .0, .1 etc. from OPUS files
-  # sample_id <- sub("(.+)\\.[[:digit:]]+$", "\\1", file_name_nopath)
-  #
-  # # Extract sample repetition number (rep_no) from file name
-  # rep_no <- sub(".+\\.([[:digit:]])+$", "\\1", file_path)
 
   sample_id <- unlist(strsplit(SNM, ";", useBytes = TRUE))[1]
   rep_no <- NA
   file_name_nopath <- NA
 
   # Create unique_id using file_name and time
-  # ymd_id <- format(max(date_time), "%Y%m%d")
   ymdhms_id <- max(date_time)
   unique_id <- paste0(sample_id, "_", ymdhms_id)
 
@@ -962,15 +752,13 @@ opus_read_raw <- function(
       function(i) {
         colnames(spc_m[[i]]) <- round(wavenumbers[[i]], 1)
         rownames(spc_m[[i]]) <- unique_id
-        # data.table::as.data.table(spc_m[[i]])
         spc_m[[i]]
       }
     ),
     names(spc_m)
   )
 
-  # Save all relevant data parameters (metadata)
-  # metadata <- tibble::tibble(
+  # Save all relevant metadata
   metadata <- data.frame(
     unique_id = unique_id,
     file_id = file_name_nopath, # pb (20170514): changed `scan_id` to `file_id`
@@ -1001,7 +789,7 @@ opus_read_raw <- function(
     temp_scanner_sm = TSC_all[[length(TSC_all)]], # select last element
     # Temperature of scanner during reference measurement;
     # if there is only one element in TSC_all, temperature during reference
-    # mesurement is not saved
+    # measurement is not saved
     temp_scanner_rf = ifelse(length(TSC_all) == 1, NA, TSC_all[[1]]),
     # Relative humidity
     hum_rel_sm = HUM_rel[[length(HUM_rel)]], # sample measurement
