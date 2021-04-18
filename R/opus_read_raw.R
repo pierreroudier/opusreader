@@ -105,7 +105,7 @@ opus_read_raw <- function(
   NPT <- sapply(
     npt_all,
     function(npt) {
-      seek(con, npt, origin = "start")
+      seek(con, npt, origin = "start", rw = "read")
       readBin(con, what = "integer", n = 12, size = 4)[2]
     })
 
@@ -230,7 +230,7 @@ opus_read_raw <- function(
   # Read number of points corresponding to spectra in file ---------------------
   NPT_spc <- sapply(seq_along(npt_spc),
                     function(i) {
-                      seek(con, npt_spc[i], origin = "start")
+                      seek(con, npt_spc[i], origin = "start", rw = "read")
                       readBin(con, what = "integer", n = 12, size = 4)[2]
                     })
 
@@ -252,7 +252,7 @@ opus_read_raw <- function(
       #   endian = "little"
       # )[[5]]
 
-      seek(con, end - 4, origin = "start")
+      seek(con, end - 4, origin = "start", rw = "read")
       readBin(con, what = "numeric", n = NPT, size = 4, endian = "little")
 
     },
@@ -265,7 +265,7 @@ opus_read_raw <- function(
   FXV_spc <- sapply(
     fxv_spc,
     function(fxv_spc) {
-      seek(con, fxv_spc, origin = "start")
+      seek(con, fxv_spc, origin = "start", rw = "read")
       readBin(con, what = "numeric", n = 16, size = 8)[1]
     }
   )
@@ -273,7 +273,7 @@ opus_read_raw <- function(
   LXV_spc <- sapply(
     lxv_spc,
     function(lxv_spc) {
-      seek(con, lxv_spc, origin = "start")
+      seek(con, lxv_spc, origin = "start", rw = "read")
       readBin(con, what = "numeric", n = 16, size = 8)[1]
     }
   )
@@ -429,7 +429,7 @@ opus_read_raw <- function(
     #   endian = "little"
     # )[[5]]
 
-    seek(con, end_spc[which_AB[length(which_AB)]], origin = "start")
+    seek(con, end_spc[which_AB[length(which_AB)]], origin = "start", rw = "read")
     spc[[which_AB[length(which_AB)]]] <- readBin(
       con,
       what = "integer",
@@ -456,7 +456,7 @@ opus_read_raw <- function(
   # list_assigned_t <- purrr::transpose(
   #   Filter(Negate(function(x) is.null(unlist(x))), list_assigned)
   # )
- 
+
   list_assigned_t <- .base_transpose(
     Filter(Negate(function(x) is.null(unlist(x))), list_assigned)
   )
@@ -488,7 +488,7 @@ opus_read_raw <- function(
     #   endian = "little"
     # )[[5]]
 
-    seek(con, end_spc[Sc_assigned$spc_idx[Sc_assigned$spc_code == "ScSm"]], origin = "start")
+    seek(con, end_spc[Sc_assigned$spc_idx[Sc_assigned$spc_code == "ScSm"]], origin = "start", rw = "read")
     spc[["ScSm"]] <- readBin(
       con,
       what = "integer",
@@ -511,7 +511,7 @@ opus_read_raw <- function(
   #     nbytes = 10, human = "char", size = 1, endian = "little")
   #   )
 
-  seek(con, ins[length(ins)] + 7, origin = "start")
+  seek(con, ins[length(ins)] + 7, origin = "start", rw = "read")
   INS <- readBin(
     con,
     what = "character",
@@ -523,7 +523,7 @@ opus_read_raw <- function(
   lwn <- grepRaw("LWN", pr, all = TRUE)[1] + 7 # Laser wavenumber
 
   # LWN <- hexView::readRaw(file_path, offset = lwn, nbytes = 8, human = "real", size=8)[[5]][1]
-  seek(con, lwn, origin = "start")
+  seek(con, lwn, origin = "start", rw = "read")
   LWN <- readBin(
     con,
     what = "numeric",
@@ -542,7 +542,7 @@ opus_read_raw <- function(
     #   human = "real",
     #   size = 8
     # )[[5]][[1]] # can include sample and background temperature
-    seek(con, tsc, origin = "start")
+    seek(con, tsc, origin = "start", rw = "read")
     readBin(
       con,
       what = "numeric",
@@ -567,7 +567,7 @@ opus_read_raw <- function(
       #   size = 8
       # )[[5]][[1]]
 
-      seek(con, hum_rel, origin = "start")
+      seek(con, hum_rel, origin = "start", rw = "read")
       readBin(
         con,
         what = "numeric",
@@ -592,7 +592,7 @@ opus_read_raw <- function(
       #   size = 8
       # )[[5]][[1]]
 
-      seek(con, hum_abs, origin = "start")
+      seek(con, hum_abs, origin = "start", rw = "read")
       readBin(
         con,
         what = "numeric",
@@ -616,7 +616,7 @@ opus_read_raw <- function(
   #     endian = "little"
   #   )
   # )
-  seek(con, src[length(src)] + 4, origin = "start")
+  seek(con, src[length(src)] + 4, origin = "start", rw = "read")
   SRC <- readBin(
     con,
     what = "character",
@@ -642,7 +642,7 @@ opus_read_raw <- function(
   #   )
   # )
   #
-  seek(con, bms[length(bms)] + 4, origin = "start")
+  seek(con, bms[length(bms)] + 4, origin = "start", rw = "read")
   BMS <- readBin(
     con,
     what = "character",
@@ -664,7 +664,7 @@ opus_read_raw <- function(
   #   size = 2
   # )[[5]][1]
 
-  seek(con, zff, origin = "start")
+  seek(con, zff, origin = "start", rw = "read")
   ZFF <- readBin(
     con,
     what = "integer",
@@ -690,7 +690,7 @@ opus_read_raw <- function(
       #   size = 8
       # )[[5]][1]
 
-      seek(con, csf, origin = "start")
+      seek(con, csf, origin = "start", rw = "read")
       readBin(
         con,
         what = "numeric",
@@ -717,7 +717,7 @@ opus_read_raw <- function(
         #   size = 8
         # )[[5]][1]
 
-        seek(con, mxy, origin = "start")
+        seek(con, mxy, origin = "start", rw = "read")
         readBin(
           con,
           what = "numeric",
@@ -746,7 +746,7 @@ opus_read_raw <- function(
         #   endian = "little"
         # )
 
-        seek(con, dxu, origin = "start")
+        seek(con, dxu, origin = "start", rw = "read")
         readBin(
           con,
           what = "character",
@@ -780,7 +780,7 @@ opus_read_raw <- function(
         #   )
         # )
 
-        seek(con, tim, origin = "start")
+        seek(con, tim, origin = "start", rw = "read")
         readBin(
           con,
           what = "character",
@@ -813,7 +813,7 @@ opus_read_raw <- function(
       #     endian = "little"
       #   )
       # )
-      seek(con, dat, origin = "start")
+      seek(con, dat, origin = "start", rw = "read")
       readBin(
         con,
         what = "character",
@@ -867,7 +867,7 @@ opus_read_raw <- function(
       #   )
       # )
 
-      seek(con, plf, origin = "start")
+      seek(con, plf, origin = "start", rw = "read")
       res <- readBin(
         con,
         what = "character",
@@ -894,7 +894,7 @@ opus_read_raw <- function(
   #   size = 2
   # )[[5]][1]
 
-  seek(con, res, origin = "start")
+  seek(con, res, origin = "start", rw = "read")
   RES <- readBin(
     con,
     what = "integer",
@@ -918,7 +918,7 @@ opus_read_raw <- function(
   #   )
   # )
 
-  seek(con, snm, origin = "start")
+  seek(con, snm, origin = "start", rw = "read")
   SNM <- readBin(
     con,
     what = "character",
