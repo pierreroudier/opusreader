@@ -4,27 +4,19 @@
 \alias{opus_read_raw}
 \title{Read a Bruker OPUS spectrum binary raw string}
 \usage{
-opus_read_raw(
-  pr,
-  extract = c("spc"),
-  print_progress = TRUE,
-  atm_comp_minus4offset = FALSE
-)
+opus_read_raw(pr, extract = "spc", atm_comp_minus4offset = FALSE)
 }
 \arguments{
 \item{pr}{a raw vector}
 
 \item{extract}{Character vector of spectra types to extract from OPUS binary
-file. Default is \code{c("spc")}, which will extract the final spectra, e.g.
+file. Default is \code{"spc"}, which will extract the final spectra, e.g.
 expressed in absorbance (named \code{AB} in Bruker OPUS programs). Possible
 additional values for the character vector supplied to extract are
 \code{"ScSm"} (single channel spectrum of the sample measurement), \
 code{"ScRf"} (single channel spectrum of the reference measurment),
 \code{"IgSm"} (interferogram of the sample measurment) and \code{"IgRf"}
 (interferogram of the reference measurement).}
-
-\item{print_progress}{Logical (default \code{TRUE}) whether a message is
-printed when an OPUS binary file is parsed into an R list entry.}
 
 \item{atm_comp_minus4offset}{Logical whether spectra after atmospheric
 compensation are read with an offset of \code{-4} bites from Bruker OPUS

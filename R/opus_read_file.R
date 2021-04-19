@@ -35,6 +35,7 @@ opus_read <- function(
   if (!file.exists(file_path)) {
     stop(paste0("File does not exist"))
   }
+
   try({
 
     # Get raw vector
