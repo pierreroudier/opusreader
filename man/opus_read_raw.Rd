@@ -4,10 +4,10 @@
 \alias{opus_read_raw}
 \title{Read a Bruker OPUS spectrum binary raw string}
 \usage{
-opus_read_raw(pr, extract = "spc", atm_comp_minus4offset = FALSE)
+opus_read_raw(rw, extract = "spc", atm_comp_minus4offset = FALSE)
 }
 \arguments{
-\item{pr}{a raw vector}
+\item{rw}{a raw vector}
 
 \item{extract}{Character vector of spectra types to extract from OPUS binary
 file. Default is \code{"spc"}, which will extract the final spectra, e.g.

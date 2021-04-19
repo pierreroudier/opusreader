@@ -4,7 +4,7 @@
 #' Read single binary acquired with an
 #' Bruker Vertex FTIR Instrument
 #'
-#' @param pr a raw vector
+#' @param rw a raw vector
 #' @param extract Character vector of spectra types to extract from OPUS binary
 #' file. Default is \code{"spc"}, which will extract the final spectra, e.g.
 #' expressed in absorbance (named \code{AB} in Bruker OPUS programs). Possible
@@ -23,7 +23,7 @@
 #' @author Philipp Baumann
 #'
 opus_read_raw <- function(
-  pr,
+  rw,
   extract = "spc",
   atm_comp_minus4offset = FALSE
 ) {
@@ -35,12 +35,12 @@ opus_read_raw <- function(
   # spectral information -------------------------------------------------------
 
   # Get positions of "END" strings
-  end <- grepRaw("END", pr, all = TRUE) + 11
+  end <- grepRaw("END", rw, all = TRUE) + 11
   # Get all positions of "NPT" (number of points) string
-  npt_all <- grepRaw("NPT", pr, all = TRUE) + 3
+  npt_all <- grepRaw("NPT", rw, all = TRUE) + 3
   # Get frequency of first (FXV) and last point (LXV) positions
-  fxv_all <- grepRaw("FXV", pr, all = TRUE) + 7
-  lxv_all <- grepRaw("LXV", pr, all = TRUE) + 7
+  fxv_all <- grepRaw("FXV", rw, all = TRUE) + 7
+  lxv_all <- grepRaw("LXV", rw, all = TRUE) + 7
 
   # For some files, the number of positions where "FXV" and "LXV" occur
   # are not equal, e.g. for the file in
@@ -96,7 +96,7 @@ opus_read_raw <- function(
   # ----------------------------------------------------------------------------
 
   ## Read basic spectral information ===========================================
-  con <- rawConnection(pr)
+  con <- rawConnection(rw)
 
   # Read all number of points (NPT) at once
   NPT <- sapply(
@@ -469,7 +469,7 @@ opus_read_raw <- function(
 
   # Instrument parameters ------------------------------------------------------
 
-  ins <- grepRaw("INS", pr, all = TRUE) # Instrument type
+  ins <- grepRaw("INS", rw, all = TRUE) # Instrument type
   seek(con, ins[length(ins)] + 7, origin = "start", rw = "read")
   INS <- readBin(
     con,
@@ -479,7 +479,7 @@ opus_read_raw <- function(
     endian = "little"
   )[1]
 
-  lwn <- grepRaw("LWN", pr, all = TRUE)[1] + 7 # Laser wavenumber
+  lwn <- grepRaw("LWN", rw, all = TRUE)[1] + 7 # Laser wavenumber
   seek(con, lwn, origin = "start", rw = "read")
   LWN <- readBin(
     con,
@@ -488,7 +488,7 @@ opus_read_raw <- function(
     size = 8
   )[1]
 
-  tsc <- grepRaw("TSC", pr, all = TRUE) + 7 # Scanner temperature
+  tsc <- grepRaw("TSC", rw, all = TRUE) + 7 # Scanner temperature
   TSC_all <- lapply(tsc, function(tsc) {
     seek(con, tsc, origin = "start", rw = "read")
     readBin(
@@ -500,7 +500,7 @@ opus_read_raw <- function(
   })
 
   # Read relative humidity of the interferometer during measurement
-  hum_rel <- grepRaw("HUM", pr, all = TRUE) + 7
+  hum_rel <- grepRaw("HUM", rw, all = TRUE) + 7
   HUM_rel <- lapply(
     hum_rel,
     function(hum_rel) {
@@ -515,7 +515,7 @@ opus_read_raw <- function(
     })
 
   # Read absolute humidity of the interferometer during measurement
-  hum_abs <- grepRaw("HUA", pr, all = TRUE) + 7
+  hum_abs <- grepRaw("HUA", rw, all = TRUE) + 7
   HUM_abs <- lapply(
     hum_abs,
     function(hum_abs) {
@@ -531,7 +531,7 @@ opus_read_raw <- function(
 
   # Optics parameters ----------------------------------------------------------
 
-  src <- grepRaw("SRC", pr, all = TRUE) # Source: MIR or NIR
+  src <- grepRaw("SRC", rw, all = TRUE) # Source: MIR or NIR
   seek(con, src[length(src)] + 4, origin = "start", rw = "read")
   SRC <- readBin(
     con,
@@ -544,7 +544,7 @@ opus_read_raw <- function(
   # instrument range
   instr_range <- tolower(paste(INS, SRC, sep = "-"))
 
-  bms <- grepRaw("BMS", pr, all = TRUE) # Beamsplitter
+  bms <- grepRaw("BMS", rw, all = TRUE) # Beamsplitter
   seek(con, bms[length(bms)] + 4, origin = "start", rw = "read")
   BMS <- readBin(
     con,
@@ -556,7 +556,7 @@ opus_read_raw <- function(
   BMS <- unlist(strsplit(BMS, ",", useBytes = TRUE))[1]
 
   # Fourier transform parameters -----------------------------------------------
-  zff <- grepRaw("ZFF", pr, all = TRUE)[1] + 5 # Zero filling factor (numeric)
+  zff <- grepRaw("ZFF", rw, all = TRUE)[1] + 5 # Zero filling factor (numeric)
   seek(con, zff, origin = "start", rw = "read")
   ZFF <- readBin(
     con,
@@ -568,7 +568,7 @@ opus_read_raw <- function(
 
   # (Additional) Standard parameters -------------------------------------------
 
-  csf_all <- grepRaw("CSF", pr, all = TRUE) + 7 # y-scaling factor
+  csf_all <- grepRaw("CSF", rw, all = TRUE) + 7 # y-scaling factor
   # Read only CSF byte positions that correspond to final spectra
   CSF <- lapply(
     csf_all[npt_all %in% npt_spc],
@@ -583,7 +583,7 @@ opus_read_raw <- function(
       )[1]
     })
 
-  mxy_all <- grepRaw("MXY", pr, all = TRUE) + 7 # Y-maximum
+  mxy_all <- grepRaw("MXY", rw, all = TRUE) + 7 # Y-maximum
   MXY <- unlist(
     lapply(
       mxy_all[npt_all %in% npt_spc],
@@ -599,9 +599,9 @@ opus_read_raw <- function(
     )
   )
 
-  mny <- grepRaw("MNY", pr, all = TRUE) + 7 # Y-minimum
+  mny <- grepRaw("MNY", rw, all = TRUE) + 7 # Y-minimum
 
-  dxu_all <- grepRaw("DXU", pr, all = TRUE) + 7 # X units
+  dxu_all <- grepRaw("DXU", rw, all = TRUE) + 7 # X units
   DXU <- lapply(
     dxu_all,
     function(dxu) {
@@ -617,10 +617,10 @@ opus_read_raw <- function(
   )
 
   # Y units -> PR: there is no DYU present in file -> PB: yes, but there is in others
-  dyu_all <- grepRaw("DYU", pr, all = TRUE) + 7
-  dat <- grepRaw("DAT", pr, all = TRUE) + 7 # Date
+  dyu_all <- grepRaw("DYU", rw, all = TRUE) + 7
+  dat <- grepRaw("DAT", rw, all = TRUE) + 7 # Date
 
-  tim <- grepRaw("TIM", pr, all = TRUE) + 7 # Time
+  tim <- grepRaw("TIM", rw, all = TRUE) + 7 # Time
 
   time <- unlist(
     lapply(
@@ -684,7 +684,7 @@ opus_read_raw <- function(
 
   # Data acquisition parameters ------------------------------------------------
 
-  plf <- grepRaw("PLF", pr, all = TRUE) + 4 # Result spectrum
+  plf <- grepRaw("PLF", rw, all = TRUE) + 4 # Result spectrum
   PLF_all <- lapply(
     plf,
     function(plf) {
@@ -704,7 +704,7 @@ opus_read_raw <- function(
   # long
   PLF <- unlist(PLF_all[lapply(PLF_all, nchar) > 0])
 
-  res <- grepRaw("RES", pr, all = TRUE)[1] + 5 # Resolution (wavenumber)
+  res <- grepRaw("RES", rw, all = TRUE)[1] + 5 # Resolution (wavenumber)
   seek(con, res, origin = "start", rw = "read")
   RES <- readBin(
     con,
@@ -716,7 +716,7 @@ opus_read_raw <- function(
 
   ## Create sample metadata objects ============================================
 
-  snm <- grepRaw("SNM", pr, all = TRUE)[1] + 7
+  snm <- grepRaw("SNM", rw, all = TRUE)[1] + 7
   seek(con, snm, origin = "start", rw = "read")
   SNM <- readBin(
     con,
