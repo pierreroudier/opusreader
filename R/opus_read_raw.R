@@ -821,7 +821,11 @@ opus_read_raw <- function(
   out <- list(
     # Metadata
     'metadata' = metadata,
-    'spc' = spc_m[["spc"]],
+    'spc' = if("spc" %in% extract && "spc" %in% names(spc_m)) {
+      spc_m[["spc"]]
+      } else {
+        NULL
+      },
     'spc_nocomp' = if ("spc_nocomp" %in% extract && "spc_nocomp" %in% names(spc_m)) {
       spc_m[["spc_nocomp"]]
     } else {
