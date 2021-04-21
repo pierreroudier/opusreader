@@ -22,6 +22,9 @@ code{"ScRf"} (single channel spectrum of the reference measurment),
 compensation are read with an offset of \code{-4} bites from Bruker OPUS
 files. Default is \code{FALSE}.}
 }
+\value{
+a list
+}
 \description{
 Read single binary acquired with an
 Bruker Vertex FTIR Instrument
