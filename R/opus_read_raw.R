@@ -17,6 +17,8 @@
 #' compensation are read with an offset of \code{-4} bites from Bruker OPUS
 #' files. Default is \code{FALSE}.
 #'
+#' @return a list
+#'
 #' @importFrom stats setNames
 #' @export
 #'
@@ -454,10 +456,15 @@ opus_read_raw <- function(
   # Read with new offset when first value of
   # ScSm  single channel sample spectrumspectrum is 0 and replace previous ---
   if (any(names(spc) %in% "ScSm" & spc[["ScSm"]][1] == 0)) {
-    seek(con, end_spc[Sc_assigned$spc_idx[Sc_assigned$spc_code == "ScSm"]], origin = "start", rw = "read")
+    seek(
+      con,
+      end_spc[Sc_assigned$spc_idx[Sc_assigned$spc_code == "ScSm"]],
+      origin = "start",
+      rw = "read"
+    )
     spc[["ScSm"]] <- readBin(
       con,
-      what = "integer",
+      what = "numeric",
       # n = NPT_spc[Sc_assigned$spc_idx[Sc_assigned$spc_code == "ScSm"]] * 4,
       n = NPT_spc[Sc_assigned$spc_idx[Sc_assigned$spc_code == "ScSm"]],
       size = 4,
@@ -508,11 +515,12 @@ opus_read_raw <- function(
       seek(con, hum_rel, origin = "start", rw = "read")
       readBin(
         con,
-        what = "numeric",
+        what = "integer",
         n = 16,
         size = 8
       )[[1]]
     })
+  HUM_rel <- HUM_rel[[1]]
 
   # Read absolute humidity of the interferometer during measurement
   hum_abs <- grepRaw("HUA", rw, all = TRUE) + 7
@@ -528,6 +536,8 @@ opus_read_raw <- function(
         size = 8
       )[[1]]
     })
+  HUM_abs <- unlist(HUM_abs)
+  if (is.null(HUM_abs)) HUM_abs <- NA
 
   # Optics parameters ----------------------------------------------------------
 
@@ -542,7 +552,8 @@ opus_read_raw <- function(
   )[[1]][1]
 
   # instrument range
-  instr_range <- tolower(paste(INS, SRC, sep = "-"))
+  instr_range <- paste(INS, SRC, sep = "-")
+  instr_range <- unlist(strsplit(instr_range, "'"))[1]
 
   bms <- grepRaw("BMS", rw, all = TRUE) # Beamsplitter
   seek(con, bms[length(bms)] + 4, origin = "start", rw = "read")
@@ -553,7 +564,7 @@ opus_read_raw <- function(
     size = 1,
     endian = "little"
   )[[1]][1]
-  BMS <- unlist(strsplit(BMS, ",", useBytes = TRUE))[1]
+  BMS <- unlist(strsplit(BMS, "'", useBytes = TRUE))[1]
 
   # Fourier transform parameters -----------------------------------------------
   zff <- grepRaw("ZFF", rw, all = TRUE)[1] + 5 # Zero filling factor (numeric)
@@ -703,6 +714,7 @@ opus_read_raw <- function(
   # Select only result spectra abbreviations that are more than 0 characters
   # long
   PLF <- unlist(PLF_all[lapply(PLF_all, nchar) > 0])
+  PLF <- unique(unlist(strsplit(PLF, "'")))
 
   res <- grepRaw("RES", rw, all = TRUE)[1] + 5 # Resolution (wavenumber)
   seek(con, res, origin = "start", rw = "read")
@@ -758,7 +770,8 @@ opus_read_raw <- function(
   # Save all relevant metadata
   metadata <- data.frame(
     unique_id = unique_id,
-    file_id = file_name_nopath, # pb (20170514): changed `scan_id` to `file_id`
+    # Removing "file_id" which does not make sense on RAW streams
+    # file_id = file_name_nopath, # pb (20170514): changed `scan_id` to `file_id`
     sample_id = sample_id,
     rep_no = as.numeric(rep_no),
     date_time_sm = max(date_time),
@@ -796,12 +809,15 @@ opus_read_raw <- function(
     # note: for Vertex 70 instrument HUA is not present, in this case,
     # HUM_abs is a list without elements
     hum_abs_sm = ifelse(length(HUM_abs) != 0, HUM_abs[[length(HUM_abs)]], NA),
-    hum_abs_rf = ifelse(length(HUM_abs) == 1 | length(HUM_abs) == 0, NA,
-                        HUM_abs[[1]]) # reference measurement
+    hum_abs_rf = ifelse(
+      length(HUM_abs) == 1 | length(HUM_abs) == 0,
+      NA,
+      HUM_abs[[1]]
+    ), # reference measurement
+    stringsAsFactors = FALSE
   )
 
   ## Allocate and return data from spectra in output list (out) ================
-
   out <- list(
     # Metadata
     'metadata' = metadata,
