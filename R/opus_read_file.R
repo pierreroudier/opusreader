@@ -18,7 +18,7 @@
 #' @param atm_comp_minus4offset Logical whether spectra after atmospheric
 #' compensation are read with an offset of \code{-4} bites from Bruker OPUS
 #' files. Default is \code{FALSE}.
-#' @usage opus_read(file_path, extract = c("spc"),
+#' @usage opus_read(file_path, extract = "spc",
 #' print_progress = TRUE, atm_comp_minus4offset = FALSE)
 #' @include opus_read_raw.R
 #' @export
@@ -40,7 +40,7 @@ opus_read <- function(
 
     # Get raw vector
     rw <- readBin(file_path, "raw", 10e9)
-    out <- opus_read_raw(rw)
+    out <- opus_read_raw(rw, extract = extract, atm_comp_minus4offset = atm_comp_minus4offset)
 
     return(out)
   })

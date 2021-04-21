@@ -4,7 +4,7 @@
 \alias{opus_read}
 \title{Read a Bruker OPUS spectrum binary file}
 \usage{
-opus_read(file_path, extract = c("spc"),
+opus_read(file_path, extract = "spc",
 print_progress = TRUE, atm_comp_minus4offset = FALSE)
 }
 \arguments{
