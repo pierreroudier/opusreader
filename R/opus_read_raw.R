@@ -818,36 +818,67 @@ opus_read_raw <- function(
   )
 
   ## Allocate and return data from spectra in output list (out) ================
+
   out <- list(
     # Metadata
     'metadata' = metadata,
-    'spc' = if("spc" %in% extract && "spc" %in% names(spc_m)) {
-      spc_m[["spc"]]
+    'spc' = if("spc" %in% extract) {
+        if ("spc" %in% names(spc_m)) {
+          spc_m[["spc"]]
+        } else {
+          warning("No 'spc' spectra found", call. = FALSE)
+          NULL
+        }
       } else {
         NULL
       },
-    'spc_nocomp' = if ("spc_nocomp" %in% extract && "spc_nocomp" %in% names(spc_m)) {
-      spc_m[["spc_nocomp"]]
+    'spc_nocomp' = if ("spc_nocomp" %in% extract) {
+        if ("spc_nocomp" %in% names(spc_m)) {
+          spc_m[["spc_nocomp"]]
+        } else {
+          warning("No 'spc_nocomp' spectra found", call. = FALSE)
+          NULL
+        }
     } else {
       NULL
     },
-    'sc_sm' = if ("ScSm" %in% extract && "ScSm" %in% names(spc_m)) {
-      spc_m[["ScSm"]]
+    'sc_sm' = if ("ScSm" %in% extract) {
+        if ("ScSm" %in% names(spc_m)) {
+          spc_m[["ScSm"]]
+        } else {
+          warning("No 'ScSm' spectra found", call. = FALSE)
+          NULL
+        }
     } else {
       NULL
     },
-    'sc_rf' = if ("ScRf" %in% extract && "ScRf" %in% names(spc_m)) {
-      spc_m[["ScRf"]]
+    'sc_rf' = if ("ScRf" %in% extract) {
+        if ("ScRf" %in% names(spc_m)) {
+          spc_m[["ScRf"]]
+        } else {
+          warning("No 'ScRf' spectra found", call. = FALSE)
+          NULL
+        }
     } else {
       NULL
     },
-    'ig_sm' = if ("IgSm" %in% extract && "IgSm" %in% names(spc_m)) {
-      spc_m[["IgSm"]]
+    'ig_sm' = if ("IgSm" %in% extract) {
+        if ("IgSm" %in% names(spc_m)) {
+          spc_m[["IgSm"]]
+        } else {
+          warning("No 'IgSm' spectra found", call. = FALSE)
+          NULL
+        }
     } else {
       NULL
     },
-    'ig_rf' = if ("IgRf" %in% extract && "IgRf" %in% names(spc_m)) {
-      spc_m[["IgRf"]]
+    'ig_rf' = if ("IgRf" %in% extract) {
+        if("IgRf" %in% names(spc_m)) {
+          spc_m[["IgRf"]]
+        } else {
+          warning("No 'IgRf' spectra found", call. = FALSE)
+          NULL
+        }
     } else {
       NULL
     },
