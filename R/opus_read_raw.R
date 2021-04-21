@@ -22,13 +22,18 @@
 #' @importFrom stats setNames
 #' @export
 #'
-#' @author Philipp Baumann
+#' @author Philipp Baumann and Pierre Roudier
 #'
 opus_read_raw <- function(
   rw,
   extract = "spc",
   atm_comp_minus4offset = FALSE
 ) {
+
+  # Sanity check on `extract`
+  if (!all(extract %in% c("spc", "spc_nocomp", "ScSm", "ScRf", "IgSm", "IgRf"))) {
+    stop("Invalid value for the `extract` option.", call. = FALSE)
+  }
 
   # Avoid `R CMD check` NOTE: no visible binding for global variable ...
   x <- y <- i <- npt <- NULL
