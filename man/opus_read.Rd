@@ -5,7 +5,7 @@
 \title{Read a Bruker OPUS spectrum binary file}
 \usage{
 opus_read(file_path, extract = "spc",
-print_progress = TRUE, atm_comp_minus4offset = FALSE)
+progress = TRUE, atm_comp_minus4offset = FALSE)
 }
 \arguments{
 \item{file_path}{Character vector with path to file}
@@ -19,7 +19,7 @@ code{"ScRf"} (single channel spectrum of the reference measurement),
 \code{"IgSm"} (interferogram of the sample measurement) and \code{"IgRf"}
 (interferogram of the reference measurement).}
 
-\item{print_progress}{Logical (default \code{TRUE}) whether a message is
+\item{progress}{Logical (default \code{TRUE}) whether a message is
 printed when an OPUS binary file is parsed into an R list entry.}
 
 \item{atm_comp_minus4offset}{Logical whether spectra after atmospheric

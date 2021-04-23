@@ -13,13 +13,13 @@
 #' code{"ScRf"} (single channel spectrum of the reference measurement),
 #' \code{"IgSm"} (interferogram of the sample measurement) and \code{"IgRf"}
 #' (interferogram of the reference measurement).
-#' @param print_progress Logical (default \code{TRUE}) whether a message is
+#' @param progress Logical (default \code{TRUE}) whether a message is
 #' printed when an OPUS binary file is parsed into an R list entry.
 #' @param atm_comp_minus4offset Logical whether spectra after atmospheric
 #' compensation are read with an offset of \code{-4} bites from Bruker OPUS
 #' files. Default is \code{FALSE}.
 #' @usage opus_read(file_path, extract = "spc",
-#' print_progress = TRUE, atm_comp_minus4offset = FALSE)
+#' progress = TRUE, atm_comp_minus4offset = FALSE)
 #' @include opus_read_raw.R
 #' @export
 #'
@@ -28,7 +28,7 @@
 opus_read <- function(
   file_path,
   extract = "spc",
-  print_progress = TRUE,
+  progress = TRUE,
   atm_comp_minus4offset = FALSE
 ) {
 
@@ -36,9 +36,30 @@ opus_read <- function(
     stop(paste0("File does not exist"))
   }
 
-  # Get raw vector
-  rw <- readBin(file_path, "raw", 10e9)
-  out <- opus_read_raw(rw, extract = extract, atm_comp_minus4offset = atm_comp_minus4offset)
+  res <- if (requireNamespace("pbapply", quietly = TRUE) & progress) {
+    pbapply::pblapply(
+      file_path,
+      function(fn) {
+        # Get raw vector
+        rw <- readBin(fn, "raw", 10e9)
+        out <- opus_read_raw(rw, extract = extract, atm_comp_minus4offset = atm_comp_minus4offset)
 
-  return(out)
+        return(out)
+      })
+  } else {
+    lapply(
+      file_path,
+      function(fn) {
+        # Get raw vector
+        rw <- readBin(fn, "raw", 10e9)
+        out <- opus_read_raw(rw, extract = extract, atm_comp_minus4offset = atm_comp_minus4offset)
+
+        return(out)
+      })
+  }
+
+  # If there was only one file to read, we unnest the list one level
+  if (length(file_path) == 1) res <- res[[1]]
+
+  return(res)
 }

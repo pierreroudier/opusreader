@@ -30,5 +30,5 @@ Read single binary acquired with an
 Bruker Vertex FTIR Instrument
 }
 \author{
-Philipp Baumann
+Philipp Baumann and Pierre Roudier
 }

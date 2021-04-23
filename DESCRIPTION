@@ -31,3 +31,5 @@ Collate:
     'data.R'
 Imports: 
     stats
+Suggests:
+    pbapply
