@@ -36,12 +36,9 @@ opus_read <- function(
     stop(paste0("File does not exist"))
   }
 
-  try({
+  # Get raw vector
+  rw <- readBin(file_path, "raw", 10e9)
+  out <- opus_read_raw(rw, extract = extract, atm_comp_minus4offset = atm_comp_minus4offset)
 
-    # Get raw vector
-    rw <- readBin(file_path, "raw", 10e9)
-    out <- opus_read_raw(rw, extract = extract, atm_comp_minus4offset = atm_comp_minus4offset)
-
-    return(out)
-  })
+  return(out)
 }
