@@ -4,7 +4,7 @@
 #' Read single binary file acquired with an
 #' Bruker Vertex FTIR Instrument
 #'
-#' @param file_path Character vector with path to file
+#' @param file Character vector with path to file
 #' @param extract Character vector of spectra types to extract from OPUS binary
 #' file. Default is \code{"spc"}, which will extract the final spectra, e.g.
 #' expressed in absorbance (named \code{AB} in Bruker OPUS programs). Possible
@@ -18,28 +18,27 @@
 #' @param atm_comp_minus4offset Logical whether spectra after atmospheric
 #' compensation are read with an offset of \code{-4} bites from Bruker OPUS
 #' files. Default is \code{FALSE}.
-#' @usage opus_read(file_path, extract = "spc",
-#' progress = TRUE, atm_comp_minus4offset = FALSE)
+#' @usage opus_read(file, extract = "spc", progress = TRUE,
+#' atm_comp_minus4offset = FALSE)
 #' @include opus_read_raw.R
 #' @export
 #'
 #' @author Philipp Baumann
 #'
 opus_read <- function(
-  file_path,
+  file,
   extract = "spc",
   progress = TRUE,
   atm_comp_minus4offset = FALSE
 ) {
 
-  if (!file.exists(file_path)) {
-    stop(paste0("File does not exist"))
-  }
-
   res <- if (requireNamespace("pbapply", quietly = TRUE) & progress) {
     pbapply::pblapply(
-      file_path,
+      file,
       function(fn) {
+
+        if (!file.exists(fn)) stop(paste0("File '", fn, "' does not exist"))
+
         # Get raw vector
         rw <- readBin(fn, "raw", 10e9)
         out <- opus_read_raw(rw, extract = extract, atm_comp_minus4offset = atm_comp_minus4offset)
@@ -48,8 +47,11 @@ opus_read <- function(
       })
   } else {
     lapply(
-      file_path,
+      file,
       function(fn) {
+
+        if (!file.exists(fn)) stop(paste0("File '", fn, "' does not exist"))
+
         # Get raw vector
         rw <- readBin(fn, "raw", 10e9)
         out <- opus_read_raw(rw, extract = extract, atm_comp_minus4offset = atm_comp_minus4offset)
@@ -59,7 +61,7 @@ opus_read <- function(
   }
 
   # If there was only one file to read, we unnest the list one level
-  if (length(file_path) == 1) res <- res[[1]]
+  if (length(file) == 1) res <- res[[1]]
 
   return(res)
 }

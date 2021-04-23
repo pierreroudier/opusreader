@@ -4,11 +4,11 @@
 \alias{opus_read}
 \title{Read a Bruker OPUS spectrum binary file}
 \usage{
-opus_read(file_path, extract = "spc",
-progress = TRUE, atm_comp_minus4offset = FALSE)
+opus_read(file, extract = "spc", progress = TRUE,
+atm_comp_minus4offset = FALSE)
 }
 \arguments{
-\item{file_path}{Character vector with path to file}
+\item{file}{Character vector with path to file}
 
 \item{extract}{Character vector of spectra types to extract from OPUS binary
 file. Default is \code{"spc"}, which will extract the final spectra, e.g.
