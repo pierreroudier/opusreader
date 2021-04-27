@@ -13,14 +13,14 @@
 #' code{"ScRf"} (single channel spectrum of the reference measurement),
 #' \code{"IgSm"} (interferogram of the sample measurement) and \code{"IgRf"}
 #' (interferogram of the reference measurement).
-#' @param simple Logical (defaults \code{FALSE}): if set to \code{TRUE}, returns a much smaller list. The first object of that list (\code{wavenumbers}) is the wavenumbers of the first file read. The second object (\code{spectra}) is a matrix of the corresponding spectra. Especially useful when passing more than one file to the \code{file} option, for example to read a suite of spectral file directly into a matrix.
+#' @param simplify Logical (defaults \code{FALSE}): if set to \code{TRUE}, returns a much smaller list. The first object of that list (\code{wavenumbers}) is the wavenumbers of the first file read. The second object (\code{spectra}) is a matrix of the corresponding spectra. Especially useful when passing more than one file to the \code{file} option, for example to read a suite of spectral file directly into a matrix.
 #' @param progress Logical (defaults \code{TRUE}) whether a message is
 #' printed when an OPUS binary file is parsed into an R list entry.
 #' @param atm_comp_minus4offset Logical whether spectra after atmospheric
 #' compensation are read with an offset of \code{-4} bites from Bruker OPUS
 #' files. Default is \code{FALSE}.
 #'
-#' @usage opus_read(file, extract = "spc", simple = FALSE, progress = TRUE,
+#' @usage opus_read(file, extract = "spc", simplify = FALSE, progress = TRUE,
 #' atm_comp_minus4offset = FALSE)
 #'
 #' @include opus_read_raw.R
@@ -31,7 +31,7 @@
 opus_read <- function(
   file,
   extract = "spc",
-  simple = FALSE,
+  simplify = FALSE,
   progress = TRUE,
   atm_comp_minus4offset = FALSE
 ) {
@@ -69,13 +69,13 @@ opus_read <- function(
     res <- res[[1]]
   } else {
     # If a simplified output ( = spectra matrix) was requested
-    if (simple) {
+    if (simplify) {
 
       if (length(extract) > 1) {
         stop("
              Simple output is currently only implemented for one value of the extract option.\n
              A workaround this limitation is to use the `lapply` function, e.g.:\n\n
-             lapply(c('spc', 'ScRf'), function(x) read_opus(file, extract = x, simple = TRUE))
+             lapply(c('spc', 'ScRf'), function(x) read_opus(file, extract = x, simplify = TRUE))
              ")
       }
 
