@@ -24,6 +24,7 @@
 #' atm_comp_minus4offset = FALSE)
 #'
 #' @include opus_read_raw.R
+#' @importFrom stats approx
 #' @export
 #'
 #' @author Philipp Baumann
@@ -80,13 +81,18 @@ opus_read <- function(
       }
 
       # Fetch wavenumbers
-      wns <- lapply(
-        res,
-        function(x) round(x$wavenumbers, digits = 0)
-      )
+      wns <- lapply(res, function(x) x$wavenumbers)
+
+      # Arbitrarily take the first rounded WN as the reference one
+      wn_ref <- wns[[1]]
 
       # # Check all wavenumbers in collection are identical
       # if (all(sapply(wns, identical, y = wns[[1]]))) {
+
+      # Check the wavenumbers have all the same length
+      if (length(unique(sapply(wns, length))) > 1) {
+        stop("Spectra can't be combined since they don't all have the same number of wavenumbers.")
+      }
 
       specs <- lapply(
         res,
@@ -98,7 +104,10 @@ opus_read <- function(
           else if (extract == "IgSm") id <- "ig_sm"
           else if (extract == "IgRf") id <- "ig_rf"
 
-          x[[id]]
+          # Linear interpolation to get spectra at rounded wavenumber
+          s <- approx(x = x$wavenumbers, y = x[[id]], xout = wn_ref, method = "linear")$y
+
+          return(s)
         })
 
       res <- list(

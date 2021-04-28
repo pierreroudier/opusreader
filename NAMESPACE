@@ -3,4 +3,5 @@
 export(opus_file)
 export(opus_read)
 export(opus_read_raw)
+importFrom(stats,approx)
 importFrom(stats,setNames)
