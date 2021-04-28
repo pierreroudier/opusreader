@@ -20,6 +20,24 @@
 #' compensation are read with an offset of \code{-4} bites from Bruker OPUS
 #' files. Default is \code{FALSE}.
 #'
+#' @return The output of \code{opus_read} depends on the value of the \code{simplify} option used in the function call.
+#'
+#'  - if \code{simplify = FALSE} (default), \code{opus_read} returns a list of 10 elements:
+#'     - \code{metadata}: a \code{data.frame} containing metadata from the OPUS file
+#'     - \code{spc}
+#'     - \code{spc_nocomp}
+#'     - \code{sc_sm}
+#'     - \code{sc_rf}
+#'     - \code{ig_sm}
+#'     - \code{ig_rf}
+#'     - \code{wavenumbers}
+#'     - \code{wavenumbers_sc_sm}
+#'     - \code{wavenumbers_sc_rf}
+#'
+#'  - if \code{simplify = TRUE}:
+#'     - \code{wavenumbers}
+#'     - \code{spectra}
+#'
 #' @usage opus_read(file, extract = "spc", simplify = FALSE, progress = TRUE,
 #' atm_comp_minus4offset = FALSE)
 #'

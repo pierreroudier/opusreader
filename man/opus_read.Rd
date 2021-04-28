@@ -28,6 +28,29 @@ printed when an OPUS binary file is parsed into an R list entry.}
 compensation are read with an offset of \code{-4} bites from Bruker OPUS
 files. Default is \code{FALSE}.}
 }
+\value{
+The output of \code{opus_read} depends on the value of the \code{simplify} option used in the function call.
+\itemize{
+\item if \code{simplify = FALSE} (default), \code{opus_read} returns a list of 10 elements:
+\itemize{
+\item \code{metadata}: a \code{data.frame} containing metadata from the OPUS file
+\item \code{spc}
+\item \code{spc_nocomp}
+\item \code{sc_sm}
+\item \code{sc_rf}
+\item \code{ig_sm}
+\item \code{ig_rf}
+\item \code{wavenumbers}
+\item \code{wavenumbers_sc_sm}
+\item \code{wavenumbers_sc_rf}
+}
+\item if \code{simplify = TRUE}:
+\itemize{
+\item \code{wavenumbers}
+\item \code{spectra}
+}
+}
+}
 \description{
 Read single binary file acquired with an
 Bruker Vertex FTIR Instrument
