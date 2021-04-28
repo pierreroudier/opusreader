@@ -86,9 +86,6 @@ opus_read <- function(
       # Arbitrarily take the first rounded WN as the reference one
       wn_ref <- wns[[1]]
 
-      # # Check all wavenumbers in collection are identical
-      # if (all(sapply(wns, identical, y = wns[[1]]))) {
-
       # Check the wavenumbers have all the same length
       if (length(unique(sapply(wns, length))) > 1) {
         stop("Spectra can't be combined since they don't all have the same number of wavenumbers.")
@@ -115,9 +112,6 @@ opus_read <- function(
         spectra = do.call(rbind, specs)
       )
 
-      # } else {
-      #   stop("There is a mismatch in wavenumbers in the different files.", call. = FALSE)
-      # }
     }
   }
 
