@@ -32,4 +32,5 @@ Collate:
 Imports: 
     stats
 Suggests:
-    pbapply
+    pbapply,
+    testthat
