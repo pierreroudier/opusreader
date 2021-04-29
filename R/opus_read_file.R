@@ -14,7 +14,7 @@
 #' \code{"IgSm"} (interferogram of the sample measurement) and \code{"IgRf"}
 #' (interferogram of the reference measurement).
 #' @param simplify Logical (defaults \code{FALSE}): if set to \code{TRUE}, returns a much smaller list. The first object of that list (\code{wavenumbers}) is the wavenumbers of the first file read. The second object (\code{spectra}) is a matrix of the corresponding spectra. Especially useful when passing more than one file to the \code{file} option, for example to read a suite of spectral file directly into a matrix.
-#' @param wns_digits Integer that specifies the number of decimal places used to round 
+#' @param wns_digits Integer that specifies the number of decimal places used to round
 #' the wavenumbers (values of x-variables) if \code{simplify = TRUE}.
 #' @param progress Logical (defaults \code{TRUE}) whether a message is
 #' printed when an OPUS binary file is parsed into an R list entry.
@@ -40,7 +40,7 @@
 #'     - \code{wavenumbers}
 #'     - \code{spectra}
 #'
-#' @usage opus_read(file, extract = "spc", simplify = FALSE, progress = TRUE,
+#' @usage opus_read(file, extract = "spc", simplify = FALSE, wns_digits = 1L, progress = TRUE,
 #' atm_comp_minus4offset = FALSE)
 #'
 #' @include opus_read_raw.R
