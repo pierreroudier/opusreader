@@ -20,7 +20,7 @@
 #' @return a list of 10 elements:
 #'     - \code{metadata}: a \code{data.frame} containing metadata from the OPUS file
 #'     - \code{spc} If \code{"spc"} was requested in the \code{extract} option, a matrix of the absorbance spectrum of the sample (otherwise set to \code{NULL}).
-#'     - \code{spc_nocomp} ??
+#'     - \code{spc_nocomp} If \code{"spc_nocomp"} was requested in the \code{extract} option, a matrix of the absorbance spectrum of the sample uncompensated for athmospheric correction (otherwise set to \code{NULL}).
 #'     - \code{sc_sm} If \code{"ScSm"} was requested in the \code{extract} option, a matrix of the single channel spectrum of the sample (otherwise set to \code{NULL}).
 #'     - \code{sc_rf} If \code{"ScRf"} was requested in the \code{extract} option, a matrix of the single channel spectrum of the reference (otherwise set to \code{NULL}).
 #'     - \code{ig_sm} If \code{"IgSm"} was requested in the \code{extract} option, a matrix of the interferogram of the sample (otherwise set to \code{NULL}).
@@ -403,6 +403,7 @@ opus_read_raw <- function(
   which_AB <- names(spc)[!names(spc) %in%
                            c(Ig_assigned[["spc_idx"]], na_assigned[["spc_idx"]],
                              Sc_assigned[["spc_idx"]])]
+
   AB_assigned <- if (length(which_AB) == 1) {
     list(
       spc_idx = which_AB,

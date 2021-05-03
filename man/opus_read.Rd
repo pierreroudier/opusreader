@@ -38,7 +38,7 @@ The output of \code{opus_read} depends on the value of the \code{simplify} optio
 \itemize{
 \item \code{metadata}: a \code{data.frame} containing metadata from the OPUS file
 \item \code{spc} If \code{"spc"} was requested in the \code{extract} option, a matrix of the absorbance spectrum of the sample (otherwise set to \code{NULL}).
-\item \code{spc_nocomp} ??
+\item \code{spc_nocomp} If \code{"spc_nocomp"} was requested in the \code{extract} option, a matrix of the absorbance spectrum of the sample uncompensated for athmospheric correction (otherwise set to \code{NULL}).
 \item \code{sc_sm} If \code{"ScSm"} was requested in the \code{extract} option, a matrix of the single channel spectrum of the sample (otherwise set to \code{NULL}).
 \item \code{sc_rf} If \code{"ScRf"} was requested in the \code{extract} option, a matrix of the single channel spectrum of the reference (otherwise set to \code{NULL}).
 \item \code{ig_sm} If \code{"IgSm"} was requested in the \code{extract} option, a matrix of the interferogram of the sample (otherwise set to \code{NULL}).
