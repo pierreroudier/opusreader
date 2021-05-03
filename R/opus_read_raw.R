@@ -17,7 +17,17 @@
 #' compensation are read with an offset of \code{-4} bites from Bruker OPUS
 #' files. Default is \code{FALSE}.
 #'
-#' @return a list
+#' @return a list of 10 elements:
+#'     - \code{metadata}: a \code{data.frame} containing metadata from the OPUS file
+#'     - \code{spc} If \code{"spc"} was requested in the \code{extract} option, a matrix of the absorbance spectrum of the sample (otherwise set to \code{NULL}).
+#'     - \code{spc_nocomp} ??
+#'     - \code{sc_sm} If \code{"ScSm"} was requested in the \code{extract} option, a matrix of the single channel spectrum of the sample (otherwise set to \code{NULL}).
+#'     - \code{sc_rf} If \code{"ScRf"} was requested in the \code{extract} option, a matrix of the single channel spectrum of the reference (otherwise set to \code{NULL}).
+#'     - \code{ig_sm} If \code{"IgSm"} was requested in the \code{extract} option, a matrix of the interferogram of the sample (otherwise set to \code{NULL}).
+#'     - \code{ig_rf}  If \code{"IgRf"} was requested in the \code{extract} option, a matrix of the interferogram of the reference (otherwise set to \code{NULL}).
+#'     - \code{wavenumbers} If \code{"spc"} was requested in the \code{extract} option, a numeric vector of the wavenumbers of the absorbance spectrum of the sample (otherwise set to \code{NULL}).
+#'     - \code{wavenumbers_sc_sm} If \code{"ScSm"} was requested in the \code{extract} option, a numeric vector of the wavenumbers of the single channel spectrum of the sample (otherwise set to \code{NULL}).
+#'     - \code{wavenumbers_sc_rf} If \code{"ScRf"} was requested in the \code{extract} option, a numeric vector of the wavenumbers of the single channel spectrum of the reference (otherwise set to \code{NULL}).
 #'
 #' @importFrom stats setNames
 #' @export

@@ -26,19 +26,19 @@
 #'
 #'  - if \code{simplify = FALSE} (default), \code{opus_read} returns a list of 10 elements:
 #'     - \code{metadata}: a \code{data.frame} containing metadata from the OPUS file
-#'     - \code{spc}
-#'     - \code{spc_nocomp}
-#'     - \code{sc_sm}
-#'     - \code{sc_rf}
-#'     - \code{ig_sm}
-#'     - \code{ig_rf}
-#'     - \code{wavenumbers}
-#'     - \code{wavenumbers_sc_sm}
-#'     - \code{wavenumbers_sc_rf}
+#'     - \code{spc} If \code{"spc"} was requested in the \code{extract} option, a matrix of the absorbance spectrum of the sample (otherwise set to \code{NULL}).
+#'     - \code{spc_nocomp} ??
+#'     - \code{sc_sm} If \code{"ScSm"} was requested in the \code{extract} option, a matrix of the single channel spectrum of the sample (otherwise set to \code{NULL}).
+#'     - \code{sc_rf} If \code{"ScRf"} was requested in the \code{extract} option, a matrix of the single channel spectrum of the reference (otherwise set to \code{NULL}).
+#'     - \code{ig_sm} If \code{"IgSm"} was requested in the \code{extract} option, a matrix of the interferogram of the sample (otherwise set to \code{NULL}).
+#'     - \code{ig_rf}  If \code{"IgRf"} was requested in the \code{extract} option, a matrix of the interferogram of the reference (otherwise set to \code{NULL}).
+#'     - \code{wavenumbers} If \code{"spc"} was requested in the \code{extract} option, a numeric vector of the wavenumbers of the absorbance spectrum of the sample (otherwise set to \code{NULL}).
+#'     - \code{wavenumbers_sc_sm} If \code{"ScSm"} was requested in the \code{extract} option, a numeric vector of the wavenumbers of the single channel spectrum of the sample (otherwise set to \code{NULL}).
+#'     - \code{wavenumbers_sc_rf} If \code{"ScRf"} was requested in the \code{extract} option, a numeric vector of the wavenumbers of the single channel spectrum of the reference (otherwise set to \code{NULL}).
 #'
 #'  - if \code{simplify = TRUE}:
-#'     - \code{wavenumbers}
-#'     - \code{spectra}
+#'     - \code{wavenumbers} numeric, wavenumbers of the spectrum requested.
+#'     - \code{spectra} matrix, requested spectrum.
 #'
 #' @usage opus_read(file, extract = "spc", simplify = FALSE, wns_digits = 1L, progress = TRUE,
 #' atm_comp_minus4offset = FALSE)

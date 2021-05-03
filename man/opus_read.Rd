@@ -37,20 +37,20 @@ The output of \code{opus_read} depends on the value of the \code{simplify} optio
 \item if \code{simplify = FALSE} (default), \code{opus_read} returns a list of 10 elements:
 \itemize{
 \item \code{metadata}: a \code{data.frame} containing metadata from the OPUS file
-\item \code{spc}
-\item \code{spc_nocomp}
-\item \code{sc_sm}
-\item \code{sc_rf}
-\item \code{ig_sm}
-\item \code{ig_rf}
-\item \code{wavenumbers}
-\item \code{wavenumbers_sc_sm}
-\item \code{wavenumbers_sc_rf}
+\item \code{spc} If \code{"spc"} was requested in the \code{extract} option, a matrix of the absorbance spectrum of the sample (otherwise set to \code{NULL}).
+\item \code{spc_nocomp} ??
+\item \code{sc_sm} If \code{"ScSm"} was requested in the \code{extract} option, a matrix of the single channel spectrum of the sample (otherwise set to \code{NULL}).
+\item \code{sc_rf} If \code{"ScRf"} was requested in the \code{extract} option, a matrix of the single channel spectrum of the reference (otherwise set to \code{NULL}).
+\item \code{ig_sm} If \code{"IgSm"} was requested in the \code{extract} option, a matrix of the interferogram of the sample (otherwise set to \code{NULL}).
+\item \code{ig_rf}  If \code{"IgRf"} was requested in the \code{extract} option, a matrix of the interferogram of the reference (otherwise set to \code{NULL}).
+\item \code{wavenumbers} If \code{"spc"} was requested in the \code{extract} option, a numeric vector of the wavenumbers of the absorbance spectrum of the sample (otherwise set to \code{NULL}).
+\item \code{wavenumbers_sc_sm} If \code{"ScSm"} was requested in the \code{extract} option, a numeric vector of the wavenumbers of the single channel spectrum of the sample (otherwise set to \code{NULL}).
+\item \code{wavenumbers_sc_rf} If \code{"ScRf"} was requested in the \code{extract} option, a numeric vector of the wavenumbers of the single channel spectrum of the reference (otherwise set to \code{NULL}).
 }
 \item if \code{simplify = TRUE}:
 \itemize{
-\item \code{wavenumbers}
-\item \code{spectra}
+\item \code{wavenumbers} numeric, wavenumbers of the spectrum requested.
+\item \code{spectra} matrix, requested spectrum.
 }
 }
 }
