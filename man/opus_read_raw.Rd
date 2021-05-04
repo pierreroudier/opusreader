@@ -12,7 +12,7 @@ opus_read_raw(rw, extract = "spc", atm_comp_minus4offset = FALSE)
 \item{extract}{Character vector of spectra types to extract from OPUS binary
 file. Default is \code{"spc"}, which will extract the final spectra, e.g.
 expressed in absorbance (named \code{AB} in Bruker OPUS programs). Possible
-additional values for the character vector supplied to extract are
+additional values for the character vector supplied to extract are \code{"spc_nocomp"} (spectrum of the sample without background correction),
 \code{"ScSm"} (single channel spectrum of the sample measurement), \
 code{"ScRf"} (single channel spectrum of the reference measurment),
 \code{"IgSm"} (interferogram of the sample measurment) and \code{"IgRf"}
@@ -25,13 +25,13 @@ files. Default is \code{FALSE}.}
 \value{
 a list of 10 elements:
 - \code{metadata}: a \code{data.frame} containing metadata from the OPUS file
-- \code{spc} If \code{"spc"} was requested in the \code{extract} option, a matrix of the absorbance spectrum of the sample (otherwise set to \code{NULL}).
-- \code{spc_nocomp} If \code{"spc_nocomp"} was requested in the \code{extract} option, a matrix of the absorbance spectrum of the sample uncompensated for athmospheric correction (otherwise set to \code{NULL}).
+- \code{spc} If \code{"spc"} was requested in the \code{extract} option, a matrix of the spectrum of the sample (otherwise set to \code{NULL}).
+- \code{spc_nocomp} If \code{"spc_nocomp"} was requested in the \code{extract} option, a matrix of the spectrum of the sample without background correction (otherwise set to \code{NULL}).
 - \code{sc_sm} If \code{"ScSm"} was requested in the \code{extract} option, a matrix of the single channel spectrum of the sample (otherwise set to \code{NULL}).
 - \code{sc_rf} If \code{"ScRf"} was requested in the \code{extract} option, a matrix of the single channel spectrum of the reference (otherwise set to \code{NULL}).
 - \code{ig_sm} If \code{"IgSm"} was requested in the \code{extract} option, a matrix of the interferogram of the sample (otherwise set to \code{NULL}).
 - \code{ig_rf}  If \code{"IgRf"} was requested in the \code{extract} option, a matrix of the interferogram of the reference (otherwise set to \code{NULL}).
-- \code{wavenumbers} If \code{"spc"} was requested in the \code{extract} option, a numeric vector of the wavenumbers of the absorbance spectrum of the sample (otherwise set to \code{NULL}).
+- \code{wavenumbers} If \code{"spc"} was requested in the \code{extract} option, a numeric vector of the wavenumbers of the spectrum of the sample (otherwise set to \code{NULL}).
 - \code{wavenumbers_sc_sm} If \code{"ScSm"} was requested in the \code{extract} option, a numeric vector of the wavenumbers of the single channel spectrum of the sample (otherwise set to \code{NULL}).
 - \code{wavenumbers_sc_rf} If \code{"ScRf"} was requested in the \code{extract} option, a numeric vector of the wavenumbers of the single channel spectrum of the reference (otherwise set to \code{NULL}).
 }
