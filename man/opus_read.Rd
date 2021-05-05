@@ -2,61 +2,76 @@
 % Please edit documentation in R/opus_read_file.R
 \name{opus_read}
 \alias{opus_read}
-\title{Read a Bruker OPUS spectrum binary file}
+\title{Read a Bruker OPUS Spectrum Binary File}
 \usage{
-opus_read(file, extract = "spc", simplify = FALSE, wns_digits = 1L, progress = TRUE,
-atm_comp_minus4offset = FALSE)
+opus_read(
+  file,
+  extract = "spc",
+  simplify = FALSE,
+  wns_digits = 1L,
+  progress = TRUE,
+  atm_comp_minus4offset = FALSE
+)
 }
 \arguments{
-\item{file}{Character vector with path to file}
+\item{file}{Character vector with path to file.}
 
-\item{extract}{Character vector of spectra types to extract from OPUS binary
-file. Default is \code{"spc"}, which will extract the final spectra, e.g.
-expressed in absorbance (named \code{AB} in Bruker OPUS programs). Possible
-additional values for the character vector supplied to extract are \code{"spc_nocomp"} (spectrum of the sample without background correction),
-\code{"ScSm"} (single channel spectrum of the sample measurement), \
-code{"ScRf"} (single channel spectrum of the reference measurment),
-\code{"IgSm"} (interferogram of the sample measurment) and \code{"IgRf"}
+\item{extract}{Character vector of spectra types to extract from OPUS binary file.
+Default is \code{"spc"}, which will extract the final spectra, e.g. expressed in absorbance
+(named \code{AB} in Bruker OPUS program). Possible  additional values for the character vector
+supplied to extract are \code{"spc_nocomp"} (spectrum of the sample without background correction),
+\code{"ScSm"} (single channel spectrum of the sample measurement), \code{ScRf} (single channel spectrum
+of the reference measurement), \code{"IgSm"} (interferogram of the sample measurement) and \code{"IgRf"}
 (interferogram of the reference measurement).}
 
-\item{simplify}{Logical (defaults \code{FALSE}): if set to \code{TRUE}, returns a much smaller list. The first object of that list (\code{wavenumbers}) is the wavenumbers of the first file read. The second object (\code{spectra}) is a matrix of the corresponding spectra. Especially useful when passing more than one file to the \code{file} option, for example to read a suite of spectral file directly into a matrix.}
+\item{simplify}{Logical (defaults \code{FALSE}): if set to \code{TRUE}, returns a flattened list.
+The first element of that list (\code{wavenumbers}) is the wavenumbers of the first file read.
+The second element (\code{spectra}) is a matrix of the corresponding spectra. Especially useful when
+passing more than one file to the \code{file} option, for example to read a suite of spectral file
+directly into a matrix.}
 
 \item{wns_digits}{Integer that specifies the number of decimal places used to round
 the wavenumbers (values of x-variables) if \code{simplify = TRUE}.}
 
-\item{progress}{Logical (defaults \code{TRUE}) whether a message is
-printed when an OPUS binary file is parsed into an R list entry.}
+\item{progress}{Logical (defaults \code{TRUE}) whether a message is printed when an OPUS binary file
+is parsed into an R list entry.}
 
-\item{atm_comp_minus4offset}{Logical whether spectra after atmospheric
-compensation are read with an offset of \code{-4} bites from Bruker OPUS
-files. Default is \code{FALSE}.}
+\item{atm_comp_minus4offset}{Logical whether spectra after atmospheric compensation are read with
+an offset of \code{-4} bytes from Bruker OPUS files. Default is \code{FALSE}.}
 }
 \value{
-The output of \code{opus_read} depends on the value of the \code{simplify} option used in the function call.
+The output of \code{opus_read()} depends on the value of the \code{simplify} option used in the function call.
 \itemize{
-\item if \code{simplify = FALSE} (default), \code{opus_read} returns a list of 10 elements:
+\item If \code{simplify = FALSE} (default), \code{opus_read()} returns a list of 10 elements:
 \itemize{
-\item \code{metadata}: a \code{data.frame} containing metadata from the OPUS file
-\item \code{spc} If \code{"spc"} was requested in the \code{extract} option, a matrix of the spectrum of the sample (otherwise set to \code{NULL}).
-\item \code{spc_nocomp} If \code{"spc_nocomp"} was requested in the \code{extract} option, a matrix of the spectrum of the sample without background correction (otherwise set to \code{NULL}).
-\item \code{sc_sm} If \code{"ScSm"} was requested in the \code{extract} option, a matrix of the single channel spectrum of the sample (otherwise set to \code{NULL}).
-\item \code{sc_rf} If \code{"ScRf"} was requested in the \code{extract} option, a matrix of the single channel spectrum of the reference (otherwise set to \code{NULL}).
-\item \code{ig_sm} If \code{"IgSm"} was requested in the \code{extract} option, a matrix of the interferogram of the sample (otherwise set to \code{NULL}).
-\item \code{ig_rf}  If \code{"IgRf"} was requested in the \code{extract} option, a matrix of the interferogram of the reference (otherwise set to \code{NULL}).
-\item \code{wavenumbers} If \code{"spc"} was requested in the \code{extract} option, a numeric vector of the wavenumbers of the spectrum of the sample (otherwise set to \code{NULL}).
-\item \code{wavenumbers_sc_sm} If \code{"ScSm"} was requested in the \code{extract} option, a numeric vector of the wavenumbers of the single channel spectrum of the sample (otherwise set to \code{NULL}).
-\item \code{wavenumbers_sc_rf} If \code{"ScRf"} was requested in the \code{extract} option, a numeric vector of the wavenumbers of the single channel spectrum of the reference (otherwise set to \code{NULL}).
+\item \code{metadata}: A data.frame containing metadata from the OPUS file.
+\item \code{spc}: If \code{extract = "spc"}, a matrix of the spectrum of the sample (otherwise set to \code{NULL}).
+\item \code{spc_nocomp}: If \code{extract = "spc_nocomp"}, a matrix of the spectrum of the sample without
+background correction (otherwise set to \code{NULL}).
+\item \code{sc_sm}: If \code{extract = "ScSm"}, a matrix with the single channel spectrum of the sample
+(otherwise set to \code{NULL}).
+\item \code{sc_rf}: If \code{extract = "ScRf"}, a matrix with the single channel spectrum of the reference
+(otherwise set to \code{NULL}).
+\item \code{ig_sm}: If \code{extract = "IgSm"}, a matrix with the interferogram of the sample
+(otherwise set to \code{NULL}).
+\item \code{ig_rf}: If \code{extract = "IgRf"}, a matrix with the interferogram of the reference
+(otherwise set to \code{NULL}).
+\item \code{wavenumbers}:  If \code{extract = "spc"}, a numeric vector with the wavenumbers of the sample
+spectrum (otherwise set to \code{NULL}).
+\item \code{wavenumbers_sc_sm}: If \code{extract = "ScSm"}, a numeric vector of the wavenumbers of the
+single channel spectrum of the sample (otherwise set to \code{NULL}).
+\item \code{wavenumbers_sc_rf}: If \code{extract = "ScRf"}, a numeric vector with the wavenumbers of the
+single channel spectrum of the referencea (otherwise set to \code{NULL}).
 }
-\item if \code{simplify = TRUE}:
+\item If \code{simplify = TRUE}, a list of two elements is returned:
 \itemize{
-\item \code{wavenumbers} numeric, wavenumbers of the spectrum requested.
-\item \code{spectra} matrix, requested spectrum.
+\item \code{wavenumbers}: Numeric vector with wavenumbers of the requested spectra.
+\item \code{spectra}: Matrix with spectra of requested type (see argument \code{extract}).
 }
 }
 }
 \description{
-Read single binary file acquired with an
-Bruker Vertex FTIR Instrument
+Read single binary file acquired with a Bruker Vertex FTIR Instrument.
 }
 \author{
 Philipp Baumann

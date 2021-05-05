@@ -1,47 +1,53 @@
-#' @title Read a Bruker OPUS spectrum binary file
+#' @title Read a Bruker OPUS Spectrum Binary File
 #'
 #' @description
-#' Read single binary file acquired with an
-#' Bruker Vertex FTIR Instrument
+#' Read single binary file acquired with a Bruker Vertex FTIR Instrument.
 #'
-#' @param file Character vector with path to file
-#' @param extract Character vector of spectra types to extract from OPUS binary
-#' file. Default is \code{"spc"}, which will extract the final spectra, e.g.
-#' expressed in absorbance (named \code{AB} in Bruker OPUS programs). Possible
-#' additional values for the character vector supplied to extract are \code{"spc_nocomp"} (spectrum of the sample without background correction),
-#' \code{"ScSm"} (single channel spectrum of the sample measurement), \
-#' code{"ScRf"} (single channel spectrum of the reference measurment),
-#' \code{"IgSm"} (interferogram of the sample measurment) and \code{"IgRf"}
-#' (interferogram of the reference measurement).
-#' @param simplify Logical (defaults \code{FALSE}): if set to \code{TRUE}, returns a much smaller list. The first object of that list (\code{wavenumbers}) is the wavenumbers of the first file read. The second object (\code{spectra}) is a matrix of the corresponding spectra. Especially useful when passing more than one file to the \code{file} option, for example to read a suite of spectral file directly into a matrix.
+#' @param file Character vector with path to file.
+#' @param extract Character vector of spectra types to extract from OPUS binary file.
+#'   Default is `"spc"`, which will extract the final spectra, e.g. expressed in absorbance
+#'   (named `AB` in Bruker OPUS program). Possible  additional values for the character vector
+#'   supplied to extract are `"spc_nocomp"` (spectrum of the sample without background correction),
+#'   `"ScSm"` (single channel spectrum of the sample measurement), `ScRf` (single channel spectrum
+#'   of the reference measurement), `"IgSm"` (interferogram of the sample measurement) and `"IgRf"`
+#'   (interferogram of the reference measurement).
+#' @param simplify Logical (defaults `FALSE`): if set to `TRUE`, returns a flattened list.
+#'   The first element of that list (`wavenumbers`) is the wavenumbers of the first file read.
+#'   The second element (`spectra`) is a matrix of the corresponding spectra. Especially useful when
+#'   passing more than one file to the `file` option, for example to read a suite of spectral file
+#'   directly into a matrix.
 #' @param wns_digits Integer that specifies the number of decimal places used to round
-#' the wavenumbers (values of x-variables) if \code{simplify = TRUE}.
-#' @param progress Logical (defaults \code{TRUE}) whether a message is
-#' printed when an OPUS binary file is parsed into an R list entry.
-#' @param atm_comp_minus4offset Logical whether spectra after atmospheric
-#' compensation are read with an offset of \code{-4} bites from Bruker OPUS
-#' files. Default is \code{FALSE}.
+#'   the wavenumbers (values of x-variables) if `simplify = TRUE`.
+#' @param progress Logical (defaults `TRUE`) whether a message is printed when an OPUS binary file
+#'   is parsed into an R list entry.
+#' @param atm_comp_minus4offset Logical whether spectra after atmospheric compensation are read with
+#'   an offset of `-4` bytes from Bruker OPUS files. Default is `FALSE`.
 #'
-#' @return The output of \code{opus_read} depends on the value of the \code{simplify} option used in the function call.
+#' @return The output of `opus_read()` depends on the value of the `simplify` option used in the function call.
 #'
-#'  - if \code{simplify = FALSE} (default), \code{opus_read} returns a list of 10 elements:
-#'     - \code{metadata}: a \code{data.frame} containing metadata from the OPUS file
-#'     - \code{spc} If \code{"spc"} was requested in the \code{extract} option, a matrix of the spectrum of the sample (otherwise set to \code{NULL}).
-#'     - \code{spc_nocomp} If \code{"spc_nocomp"} was requested in the \code{extract} option, a matrix of the spectrum of the sample without background correction (otherwise set to \code{NULL}).
-#'     - \code{sc_sm} If \code{"ScSm"} was requested in the \code{extract} option, a matrix of the single channel spectrum of the sample (otherwise set to \code{NULL}).
-#'     - \code{sc_rf} If \code{"ScRf"} was requested in the \code{extract} option, a matrix of the single channel spectrum of the reference (otherwise set to \code{NULL}).
-#'     - \code{ig_sm} If \code{"IgSm"} was requested in the \code{extract} option, a matrix of the interferogram of the sample (otherwise set to \code{NULL}).
-#'     - \code{ig_rf}  If \code{"IgRf"} was requested in the \code{extract} option, a matrix of the interferogram of the reference (otherwise set to \code{NULL}).
-#'     - \code{wavenumbers} If \code{"spc"} was requested in the \code{extract} option, a numeric vector of the wavenumbers of the spectrum of the sample (otherwise set to \code{NULL}).
-#'     - \code{wavenumbers_sc_sm} If \code{"ScSm"} was requested in the \code{extract} option, a numeric vector of the wavenumbers of the single channel spectrum of the sample (otherwise set to \code{NULL}).
-#'     - \code{wavenumbers_sc_rf} If \code{"ScRf"} was requested in the \code{extract} option, a numeric vector of the wavenumbers of the single channel spectrum of the reference (otherwise set to \code{NULL}).
+#'  - If `simplify = FALSE` (default), `opus_read()` returns a list of 10 elements:
+#'     - `metadata`: A data.frame containing metadata from the OPUS file.
+#'     - `spc`: If `extract = "spc"`, a matrix of the spectrum of the sample (otherwise set to `NULL`).
+#'     - `spc_nocomp`: If `extract = "spc_nocomp"`, a matrix of the spectrum of the sample without
+#'       background correction (otherwise set to `NULL`).
+#'     - `sc_sm`: If `extract = "ScSm"`, a matrix with the single channel spectrum of the sample
+#'       (otherwise set to `NULL`).
+#'     - `sc_rf`: If `extract = "ScRf"`, a matrix with the single channel spectrum of the reference
+#'       (otherwise set to `NULL`).
+#'     - `ig_sm`: If `extract = "IgSm"`, a matrix with the interferogram of the sample
+#'       (otherwise set to `NULL`).
+#'     - `ig_rf`: If `extract = "IgRf"`, a matrix with the interferogram of the reference 
+#'       (otherwise set to `NULL`).
+#'     - `wavenumbers`:  If `extract = "spc"`, a numeric vector with the wavenumbers of the sample
+#'       spectrum (otherwise set to `NULL`).
+#'     - `wavenumbers_sc_sm`: If `extract = "ScSm"`, a numeric vector of the wavenumbers of the
+#'       single channel spectrum of the sample (otherwise set to `NULL`).
+#'     - `wavenumbers_sc_rf`: If `extract = "ScRf"`, a numeric vector with the wavenumbers of the
+#'       single channel spectrum of the referencea (otherwise set to `NULL`).
 #'
-#'  - if \code{simplify = TRUE}:
-#'     - \code{wavenumbers} numeric, wavenumbers of the spectrum requested.
-#'     - \code{spectra} matrix, requested spectrum.
-#'
-#' @usage opus_read(file, extract = "spc", simplify = FALSE, wns_digits = 1L, progress = TRUE,
-#' atm_comp_minus4offset = FALSE)
+#'  - If `simplify = TRUE`, a list of two elements is returned:
+#'     - `wavenumbers`: Numeric vector with wavenumbers of the requested spectra.
+#'     - `spectra`: Matrix with spectra of requested type (see argument `extract`).
 #'
 #' @include opus_read_raw.R
 #' @importFrom stats approx
