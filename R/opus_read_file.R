@@ -1,9 +1,9 @@
-#' @title Read a Bruker OPUS Spectrum Binary File
+#' @title Read Bruker OPUS Spectrum Binary Files
 #'
 #' @description
-#' Read single binary file acquired with a Bruker Vertex FTIR Instrument.
+#' Read file(s) acquired with a Bruker Vertex FTIR Instrument.
 #'
-#' @param file Character vector with path to file.
+#' @param file Character vector with path to file(s).
 #' @param extract Character vector of spectra types to extract from OPUS binary file.
 #'   Default is `"spc"`, which will extract the final spectra, e.g. expressed in absorbance
 #'   (named `AB` in Bruker OPUS program). Possible  additional values for the character vector
@@ -11,14 +11,14 @@
 #'   `"ScSm"` (single channel spectrum of the sample measurement), `ScRf` (single channel spectrum
 #'   of the reference measurement), `"IgSm"` (interferogram of the sample measurement) and `"IgRf"`
 #'   (interferogram of the reference measurement).
-#' @param simplify Logical (defaults `FALSE`): if set to `TRUE`, returns a flattened list.
+#' @param simplify Logical (defaults to `FALSE`): if set to `TRUE`, returns a flattened list.
 #'   The first element of that list (`wavenumbers`) is the wavenumbers of the first file read.
 #'   The second element (`spectra`) is a matrix of the corresponding spectra. Especially useful when
 #'   passing more than one file to the `file` option, for example to read a suite of spectral file
 #'   directly into a matrix.
 #' @param wns_digits Integer that specifies the number of decimal places used to round
 #'   the wavenumbers (values of x-variables) if `simplify = TRUE`.
-#' @param progress Logical (defaults `TRUE`) whether a message is printed when an OPUS binary file
+#' @param progress Logical (defaults to `TRUE`) whether a message is printed when an OPUS binary file
 #'   is parsed into an R list entry.
 #' @param atm_comp_minus4offset Logical whether spectra after atmospheric compensation are read with
 #'   an offset of `-4` bytes from Bruker OPUS files. Default is `FALSE`.
@@ -36,14 +36,14 @@
 #'       (otherwise set to `NULL`).
 #'     - `ig_sm`: If `extract = "IgSm"`, a matrix with the interferogram of the sample
 #'       (otherwise set to `NULL`).
-#'     - `ig_rf`: If `extract = "IgRf"`, a matrix with the interferogram of the reference 
+#'     - `ig_rf`: If `extract = "IgRf"`, a matrix with the interferogram of the reference
 #'       (otherwise set to `NULL`).
 #'     - `wavenumbers`:  If `extract = "spc"`, a numeric vector with the wavenumbers of the sample
 #'       spectrum (otherwise set to `NULL`).
 #'     - `wavenumbers_sc_sm`: If `extract = "ScSm"`, a numeric vector of the wavenumbers of the
 #'       single channel spectrum of the sample (otherwise set to `NULL`).
 #'     - `wavenumbers_sc_rf`: If `extract = "ScRf"`, a numeric vector with the wavenumbers of the
-#'       single channel spectrum of the referencea (otherwise set to `NULL`).
+#'       single channel spectrum of the reference (otherwise set to `NULL`).
 #'
 #'  - If `simplify = TRUE`, a list of two elements is returned:
 #'     - `wavenumbers`: Numeric vector with wavenumbers of the requested spectra.

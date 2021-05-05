@@ -2,7 +2,7 @@
 % Please edit documentation in R/opus_read_file.R
 \name{opus_read}
 \alias{opus_read}
-\title{Read a Bruker OPUS Spectrum Binary File}
+\title{Read Bruker OPUS Spectrum Binary Files}
 \usage{
 opus_read(
   file,
@@ -14,7 +14,7 @@ opus_read(
 )
 }
 \arguments{
-\item{file}{Character vector with path to file.}
+\item{file}{Character vector with path to file(s).}
 
 \item{extract}{Character vector of spectra types to extract from OPUS binary file.
 Default is \code{"spc"}, which will extract the final spectra, e.g. expressed in absorbance
@@ -24,7 +24,7 @@ supplied to extract are \code{"spc_nocomp"} (spectrum of the sample without back
 of the reference measurement), \code{"IgSm"} (interferogram of the sample measurement) and \code{"IgRf"}
 (interferogram of the reference measurement).}
 
-\item{simplify}{Logical (defaults \code{FALSE}): if set to \code{TRUE}, returns a flattened list.
+\item{simplify}{Logical (defaults to \code{FALSE}): if set to \code{TRUE}, returns a flattened list.
 The first element of that list (\code{wavenumbers}) is the wavenumbers of the first file read.
 The second element (\code{spectra}) is a matrix of the corresponding spectra. Especially useful when
 passing more than one file to the \code{file} option, for example to read a suite of spectral file
@@ -33,7 +33,7 @@ directly into a matrix.}
 \item{wns_digits}{Integer that specifies the number of decimal places used to round
 the wavenumbers (values of x-variables) if \code{simplify = TRUE}.}
 
-\item{progress}{Logical (defaults \code{TRUE}) whether a message is printed when an OPUS binary file
+\item{progress}{Logical (defaults to \code{TRUE}) whether a message is printed when an OPUS binary file
 is parsed into an R list entry.}
 
 \item{atm_comp_minus4offset}{Logical whether spectra after atmospheric compensation are read with
@@ -61,7 +61,7 @@ spectrum (otherwise set to \code{NULL}).
 \item \code{wavenumbers_sc_sm}: If \code{extract = "ScSm"}, a numeric vector of the wavenumbers of the
 single channel spectrum of the sample (otherwise set to \code{NULL}).
 \item \code{wavenumbers_sc_rf}: If \code{extract = "ScRf"}, a numeric vector with the wavenumbers of the
-single channel spectrum of the referencea (otherwise set to \code{NULL}).
+single channel spectrum of the reference (otherwise set to \code{NULL}).
 }
 \item If \code{simplify = TRUE}, a list of two elements is returned:
 \itemize{
@@ -71,7 +71,7 @@ single channel spectrum of the referencea (otherwise set to \code{NULL}).
 }
 }
 \description{
-Read single binary file acquired with a Bruker Vertex FTIR Instrument.
+Read file(s) acquired with a Bruker Vertex FTIR Instrument.
 }
 \author{
 Philipp Baumann
