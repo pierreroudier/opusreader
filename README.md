@@ -49,7 +49,7 @@ plot(s$wavenumbers, s$spc, type = 'l')
 ```
 # Store OPUS file content as raw binary data
 fn <- opus_file()
-rw <- readBin(fn, "raw", 10e9)
+rw <- readBin(fn, "raw", 1e5)
 
 # Read raw binary data directly
 s <- opus_read_raw(rw)
