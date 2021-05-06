@@ -1,3 +1,4 @@
+[![R-CMD-check](https://github.com/pierreroudier/opusreader/workflows/R-CMD-check/badge.svg)](https://github.com/pierreroudier/opusreader/actions)
 [![CRAN_Status_Badge](http://www.r-pkg.org/badges/version/opusreader)](https://cran.r-project.org/package=opusreader)
 [![Total_Downloads](http://cranlogs.r-pkg.org/badges/grand-total/opusreader)](https://cran.r-project.org/package=opusreader)
 
