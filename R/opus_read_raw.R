@@ -98,15 +98,24 @@ opus_read_raw <- function(
   # Reduce size of npt_all -----------------------------------------------------
   # Some files have an extra "NPT" string without FXV, LXV, and spectral block
   if (length(npt_all) != length(fxv_all)) {
+
     diff_npt_fxv <- lapply(npt_all, function(x) fxv_all - x)
-    min_bigger0_smallerequal40 <- lapply(diff_npt_fxv, function(x) {
-      which_min_bigger0 <- x == min(x[x > 0])
-      which_smallerequal40 <- x <= 40
-      which_min_bigger0 & which_smallerequal40
-    }
+
+    min_bigger0_smallerequal40 <- lapply(
+      diff_npt_fxv,
+      function(x) {
+        which_min_bigger0 <- x == min(x[x > 0])
+        which_smallerequal40 <- x <= 40
+        which_min_bigger0 & which_smallerequal40
+      }
     )
-    which_npt_valid <- sapply(min_bigger0_smallerequal40,
-                              function(x) any(x == TRUE))
+
+    which_npt_valid <- vapply(
+      min_bigger0_smallerequal40,
+      FUN = function(x) any(x == TRUE),
+      FUN.VALUE = logical(1)
+    )
+
     npt_all <- npt_all[which_npt_valid]
   }
 
@@ -116,12 +125,14 @@ opus_read_raw <- function(
   con <- rawConnection(rw)
 
   # Read all number of points (NPT) at once
-  NPT <- sapply(
+  NPT <- vapply(
     npt_all,
-    function(npt) {
+    FUN = function(npt) {
       seek(con, npt, origin = "start", rw = "read")
       readBin(con, what = "integer", n = 12, size = 4)[2]
-    })
+    },
+    FUN.VALUE = numeric(1)
+  )
 
   # Specific error for file: <"data/soilspec_eth_bin/CI_tb_05_soil_cal.2">
   # "Invalid number of bytes" when trying to read spectra
@@ -178,7 +189,8 @@ opus_read_raw <- function(
 
     # Set FALSE repeated vector in sel_min element where TRUE positions are
     # duplicated
-    which_elem_dupl <- which(duplicated(sapply(sel_min, which)))
+    which_elem_dupl <- which(duplicated(vapply(sel_min, FUN = which, FUN.VALUE = numeric(1))))
+
     if (length(which_elem_dupl) > 1) {
       sel_min[which_elem_dupl] <- NULL
       # Reduce end_spc with duplicated elements
@@ -186,8 +198,12 @@ opus_read_raw <- function(
     }
 
     # Select minimum difference NPT position for each END position
-    npt_min <- Map(function(x, y) x[y],
-                   rep(list(npt_all), length(end_spc)), sel_min)
+    npt_min <- Map(
+      function(x, y) x[y],
+      rep(list(npt_all), length(end_spc)),
+      sel_min
+    )
+
     npt_min <- Filter(length, npt_min)
 
     # Select spectra parameters that immediately follow END positions before
@@ -245,11 +261,14 @@ opus_read_raw <- function(
   end_spc <- param_spc[["end_spc"]]
 
   # Read number of points corresponding to spectra in file ---------------------
-  NPT_spc <- sapply(seq_along(npt_spc),
-                    function(i) {
-                      seek(con, npt_spc[i], origin = "start", rw = "read")
-                      readBin(con, what = "integer", n = 12, size = 4)[2]
-                    })
+  NPT_spc <- vapply(
+    seq_along(npt_spc),
+    FUN = function(i) {
+      seek(con, npt_spc[i], origin = "start", rw = "read")
+      readBin(con, what = "integer", n = 12, size = 4)[2]
+    },
+    FUN.VALUE = numeric(1)
+  )
 
   # Delete NPT with negative signs
   NPT_spc <- NPT_spc[NPT_spc > 0]
@@ -267,20 +286,22 @@ opus_read_raw <- function(
 
   # Read FXV and LXV and calculate wavenumbers  --------------------------------
 
-  FXV_spc <- sapply(
+  FXV_spc <- vapply(
     fxv_spc,
-    function(fxv_spc) {
+    FUN = function(fxv_spc) {
       seek(con, fxv_spc, origin = "start", rw = "read")
       readBin(con, what = "numeric", n = 16, size = 8)[1]
-    }
+    },
+    FUN.VALUE = numeric(1)
   )
 
-  LXV_spc <- sapply(
+  LXV_spc <- vapply(
     lxv_spc,
-    function(lxv_spc) {
+    FUN = function(lxv_spc) {
       seek(con, lxv_spc, origin = "start", rw = "read")
       readBin(con, what = "numeric", n = 16, size = 8)[1]
-    }
+    },
+    FUN.VALUE = numeric(1)
   )
 
   # Calculate wavenumbers
@@ -345,16 +366,25 @@ opus_read_raw <- function(
 
   # Return idx (index names) of all remaining spectra that are not
   # interferograms
-  notIg <- names(spc)[!names(spc) %in%
-                        c(Ig_assigned$spc_idx, na_assigned$spc_idx)]
+  notIg <- names(spc)[
+    !names(spc) %in% c(Ig_assigned$spc_idx, na_assigned$spc_idx)
+  ]
 
   # Check if the MIR range was measured
-  wavenumbers_mir <- lapply(names(wavenumbers[notIg]),
-                            function(i) {
-                              spc[[i]][wavenumbers[notIg][[i]] < 2392 &
-                                       wavenumbers[notIg][[i]] > 2358]
-                            })
-  is_mir <- any(sapply(wavenumbers_mir, function(x) length(x) != 0))
+  wavenumbers_mir <- lapply(
+    names(wavenumbers[notIg]),
+    function(i) {
+      spc[[i]][wavenumbers[notIg][[i]] < 2392 &
+      wavenumbers[notIg][[i]] > 2358]
+    })
+
+  is_mir <- any(
+    vapply(
+      wavenumbers_mir,
+      FUN = function(x) {length(x) != 0},
+      FUN.VALUE = logical(1)
+    )
+  )
 
   if (isTRUE(is_mir)) {
     # Calculate peak ratio for absorbance at around 2392 cm^(-1)
@@ -666,11 +696,14 @@ opus_read_raw <- function(
   )
 
   # Only select "DAT" string positions that are immediately before time
-  dat_sel <- sapply(seq_along(tim),
-                    function(i) {
-                      diff_sel <- dat - tim[i]
-                      dat[which(diff_sel <= 32 & diff_sel >= -20)]
-                    })
+  dat_sel <- vapply(
+    seq_along(tim),
+    FUN = function(i) {
+      diff_sel <- dat - tim[i]
+      dat[which(diff_sel <= 32 & diff_sel >= -20)]
+    },
+    FUN.VALUE = numeric(1)
+  )
 
   date <- lapply(
     dat_sel,
