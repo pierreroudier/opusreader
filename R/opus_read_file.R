@@ -134,8 +134,23 @@ opus_read <- function(
             IgRf = "ig_rf"
           )
 
+          # Grab correct wavenumbers for interpolation
+          wn <- switch(extract,
+            spc = x$wavenumbers,
+            spc_nocomp = x$wavenumbers,
+            ScSm = x$wavenumbers_sc_sm,
+            ScRf = x$wavenumbers_sc_rf,
+            IgSm = x$wavenumbers_sc_sm,
+            IgRf = x$wavenumbers_sc_rf
+          )
+
           # Linear interpolation to get spectra at rounded wavenumber
-          s <- approx(x = x$wavenumbers, y = x[[id]], xout = wn_ref, method = "linear")$y
+          s <- approx(
+            x = wn,
+            y = x[[id]],
+            xout = wn_ref,
+            method = "linear"
+          )$y
           names(s) <- as.character(wn_ref)
 
           return(s)
