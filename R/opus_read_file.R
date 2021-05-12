@@ -125,11 +125,14 @@ opus_read <- function(
         res,
         function(x) {
 
-          if (extract == "spc") id <- "spc"
-          else if (extract == "ScSm") id <- "sc_sm"
-          else if (extract == "ScRf") id <- "sc_rf"
-          else if (extract == "IgSm") id <- "ig_sm"
-          else if (extract == "IgRf") id <- "ig_rf"
+          id <- switch(extract,
+            spc = "spc",
+            spc_nocomp = "spc_nocomp",
+            ScSm = "sc_sm",
+            ScRf = "sc_rf",
+            IgSm = "ig_sm",
+            IgRf = "ig_rf"
+          )
 
           # Linear interpolation to get spectra at rounded wavenumber
           s <- approx(x = x$wavenumbers, y = x[[id]], xout = wn_ref, method = "linear")$y
