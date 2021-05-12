@@ -322,7 +322,7 @@ opus_read_raw <- function(
   names(wavenumbers) <- paste0("idx", 1:length(wavenumbers))
 
   # Check if elements in FXV_spc (frequency of first point) are equal to 0;
-  # these are interferogram spectra --------------------------------------------
+  # these are interferogram spectra
   which_Ig <- FXV_spc[which(FXV_spc == 0)]
   Ig_assigned <- if (length(which_Ig) == 0) {
     NULL
@@ -402,10 +402,15 @@ opus_read_raw <- function(
     which_Sc <- names(which(peak_ratio > 2))
   } else {
     peak_ratio <- lapply(
-      lapply(names(wavenumbers[notIg]),
-             function(i) spc[[i]][wavenumbers[notIg][[i]] < 5340 &
-                                    wavenumbers[notIg][[i]] > 5318]),
-      function(j) j[[1]] / j[[length(j)]]
+      lapply(
+        names(wavenumbers[notIg]),
+        function(i) {
+          spc[[i]][wavenumbers[notIg][[i]] < 5340 & wavenumbers[notIg][[i]] > 5318]
+        }
+      ),
+      function(j) {
+        j[[1]] / j[[length(j)]]
+      }
     )
     names(peak_ratio) <- names(spc[notIg])
     # Single channel (Sc) assignment list
@@ -430,9 +435,13 @@ opus_read_raw <- function(
 
   # Assign corrected and uncorrected (if present) ------------------------------
   # AB spectra list
-  which_AB <- names(spc)[!names(spc) %in%
-                           c(Ig_assigned[["spc_idx"]], na_assigned[["spc_idx"]],
-                             Sc_assigned[["spc_idx"]])]
+  which_AB <- names(spc)[
+    !names(spc) %in% c(
+      Ig_assigned[["spc_idx"]],
+      na_assigned[["spc_idx"]],
+      Sc_assigned[["spc_idx"]]
+      )
+    ]
 
   AB_assigned <- if (length(which_AB) == 1) {
     list(
