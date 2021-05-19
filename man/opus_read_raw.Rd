@@ -4,18 +4,18 @@
 \alias{opus_read_raw}
 \title{Read a Bruker OPUS spectrum binary raw string}
 \usage{
-opus_read_raw(rw, type = "spc", atm_comp_minus4offset = FALSE)
+opus_read_raw(rw, type = "spec", atm_comp_minus4offset = FALSE)
 }
 \arguments{
 \item{rw}{a raw vector}
 
 \item{type}{Character vector of spectra types to extract from OPUS binary
-file. Default is \code{"spc"}, which will extract the final spectra, e.g.
+file. Default is \code{"spec"}, which will extract the final spectra, e.g.
 expressed in absorbance (named \code{AB} in Bruker OPUS programs). Possible
-additional values for the character vector supplied to \code{type} are \code{"spc_nocomp"} (spectrum of the sample without background correction),
-\code{"ScSm"} (single channel spectrum of the sample measurement), \
-code{"ScRf"} (single channel spectrum of the reference measurment),
-\code{"IgSm"} (interferogram of the sample measurment) and \code{"IgRf"}
+additional values for the character vector supplied to \code{type} are \code{"spec_no_bc"} (spectrum of the sample without background correction),
+\code{"sc_sample"} (single channel spectrum of the sample measurement), \
+code{"sc_ref"} (single channel spectrum of the reference measurement),
+\code{"ig_sample"} (interferogram of the sample measurement) and \code{"ig_ref"}
 (interferogram of the reference measurement).}
 
 \item{atm_comp_minus4offset}{Logical whether spectra after atmospheric
@@ -25,19 +25,30 @@ files. Default is \code{FALSE}.}
 \value{
 a list of 10 elements:
 - \code{metadata}: a \code{data.frame} containing metadata from the OPUS file
-- \code{spc} If \code{"spc"} was requested in the \code{type} option, a matrix of the spectrum of the sample (otherwise set to \code{NULL}).
-- \code{spc_nocomp} If \code{"spc_nocomp"} was requested in the \code{type} option, a matrix of the spectrum of the sample without background correction (otherwise set to \code{NULL}).
-- \code{sc_sm} If \code{"ScSm"} was requested in the \code{type} option, a matrix of the single channel spectrum of the sample (otherwise set to \code{NULL}).
-- \code{sc_rf} If \code{"ScRf"} was requested in the \code{type} option, a matrix of the single channel spectrum of the reference (otherwise set to \code{NULL}).
-- \code{ig_sm} If \code{"IgSm"} was requested in the \code{type} option, a matrix of the interferogram of the sample (otherwise set to \code{NULL}).
-- \code{ig_rf}  If \code{"IgRf"} was requested in the \code{type} option, a matrix of the interferogram of the reference (otherwise set to \code{NULL}).
-- \code{wavenumbers} If \code{"spc"} was requested in the \code{type} option, a numeric vector of the wavenumbers of the spectrum of the sample (otherwise set to \code{NULL}).
-- \code{wavenumbers_sc_sm} If \code{"ScSm"} was requested in the \code{type} option, a numeric vector of the wavenumbers of the single channel spectrum of the sample (otherwise set to \code{NULL}).
-- \code{wavenumbers_sc_rf} If \code{"ScRf"} was requested in the \code{type} option, a numeric vector of the wavenumbers of the single channel spectrum of the reference (otherwise set to \code{NULL}).
+- \code{spec} If \code{"spec"} was requested in the \code{type} option, a matrix of the spectrum of the sample (otherwise set to \code{NULL}).
+- \code{spec_no_bc} If \code{"spec_no_bc"} was requested in the \code{type} option, a matrix of the spectrum of the sample without background correction (otherwise set to \code{NULL}).
+- \code{sc_sample} If \code{"sc_sample"} was requested in the \code{type} option, a matrix of the single channel spectrum of the sample (otherwise set to \code{NULL}).
+- \code{sc_ref} If \code{"sc_ref"} was requested in the \code{type} option, a matrix of the single channel spectrum of the reference (otherwise set to \code{NULL}).
+- \code{ig_sample} If \code{"ig_sample"} was requested in the \code{type} option, a matrix of the interferogram of the sample (otherwise set to \code{NULL}).
+- \code{ig_ref}  If \code{"ig_ref"} was requested in the \code{type} option, a matrix of the interferogram of the reference (otherwise set to \code{NULL}).
+- \code{wavenumbers} If \code{"spec"} or \code{"spec_no_bc"} was requested in the \code{type} option, a numeric vector of the wavenumbers of the spectrum of the sample (otherwise set to \code{NULL}).
+- \code{wavenumbers_sc_sample} If \code{"sc_sample"} was requested in the \code{type} option, a numeric vector of the wavenumbers of the single channel spectrum of the sample (otherwise set to \code{NULL}).
+- \code{wavenumbers_sc_ref} If \code{"sc_ref"} was requested in the \code{type} option, a numeric vector of the wavenumbers of the single channel spectrum of the reference (otherwise set to \code{NULL}).
 }
 \description{
 Read single binary acquired with an
 Bruker Vertex FTIR Instrument
+}
+\details{
+The type of spectra returned by the function when using \code{type = "spec"} depends on the setting of the Bruker instrumet: typically, it can be either absorbance or reflectance.
+
+Note that the type of spectra to extract from the OPUS file in Bruker's OPUS software follows the following correspondance:
+\itemize{
+\item \code{ScSm} corresponds to \code{sc_sample}
+\item \code{ScRf} corresponds to \code{sc_ref}
+\item \code{IgSm} corresponds to \code{ig_sample}
+\item \code{IgRf} corresponds to \code{ig_ref}
+}
 }
 \author{
 Philipp Baumann and Pierre Roudier

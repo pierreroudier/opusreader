@@ -4,13 +4,15 @@
 #' Read file(s) acquired with a Bruker Vertex FTIR Instrument.
 #'
 #' @param file Character vector with path to file(s).
-#' @param type Character vector of spectra types to extract from OPUS binary file.
-#'   Default is `"spc"`, which will extract the final spectra, e.g. expressed in absorbance
-#'   (named `AB` in Bruker OPUS program). Possible  additional values for the character vector
-#'   supplied to \code{type} are `"spc_nocomp"` (spectrum of the sample without background correction),
-#'   `"ScSm"` (single channel spectrum of the sample measurement), `ScRf` (single channel spectrum
-#'   of the reference measurement), `"IgSm"` (interferogram of the sample measurement) and `"IgRf"`
-#'   (interferogram of the reference measurement).
+#' @param type Character vector of spectra types to extract from OPUS binary
+#' file. Default is \code{"spec"}, which will extract the final spectra, e.g.
+#' expressed in absorbance (named \code{AB} in Bruker OPUS programs). Possible
+#' additional values for the character vector supplied to \code{type} are \code{"spec_no_bc"} (spectrum of the sample without background correction),
+#' \code{"sc_sample"} (single channel spectrum of the sample measurement), \
+#' code{"sc_ref"} (single channel spectrum of the reference measurement),
+#' \code{"ig_sample"} (interferogram of the sample measurement) and \code{"ig_ref"}
+#' (interferogram of the reference measurement).
+#'
 #' @param simplify Logical (defaults to `FALSE`): if set to `TRUE`, returns a flattened list.
 #'   The first element of that list (`wavenumbers`) is the wavenumbers of the first file read.
 #'   The second element (`spectra`) is a matrix of the corresponding spectra. Especially useful when
@@ -26,24 +28,17 @@
 #' @return The output of `opus_read()` depends on the value of the `simplify` option used in the function call.
 #'
 #'  - If `simplify = FALSE` (default), `opus_read()` returns a list of 10 elements:
-#'     - `metadata`: A data.frame containing metadata from the OPUS file.
-#'     - `spc`: If `type = "spc"`, a matrix of the spectrum of the sample (otherwise set to `NULL`).
-#'     - `spc_nocomp`: If `type = "spc_nocomp"`, a matrix of the spectrum of the sample without
-#'       background correction (otherwise set to `NULL`).
-#'     - `sc_sm`: If `type = "ScSm"`, a matrix with the single channel spectrum of the sample
-#'       (otherwise set to `NULL`).
-#'     - `sc_rf`: If `type = "ScRf"`, a matrix with the single channel spectrum of the reference
-#'       (otherwise set to `NULL`).
-#'     - `ig_sm`: If `type = "IgSm"`, a matrix with the interferogram of the sample
-#'       (otherwise set to `NULL`).
-#'     - `ig_rf`: If `type = "IgRf"`, a matrix with the interferogram of the reference
-#'       (otherwise set to `NULL`).
-#'     - `wavenumbers`:  If `type = "spc"`, a numeric vector with the wavenumbers of the sample
-#'       spectrum (otherwise set to `NULL`).
-#'     - `wavenumbers_sc_sm`: If `type = "ScSm"`, a numeric vector of the wavenumbers of the
-#'       single channel spectrum of the sample (otherwise set to `NULL`).
-#'     - `wavenumbers_sc_rf`: If `type = "ScRf"`, a numeric vector with the wavenumbers of the
-#'       single channel spectrum of the reference (otherwise set to `NULL`).
+#'     - \code{metadata}: a \code{data.frame} containing metadata from the OPUS file
+#'     - \code{spec} If \code{"spec"} was requested in the \code{type} option, a matrix of the spectrum of the sample (otherwise set to \code{NULL}).
+#'     - \code{spec_no_bc} If \code{"spec_no_bc"} was requested in the \code{type} option, a matrix of the spectrum of the sample without background correction (otherwise set to \code{NULL}).
+#'     - \code{sc_sample} If \code{"sc_sample"} was requested in the \code{type} option, a matrix of the single channel spectrum of the sample (otherwise set to \code{NULL}).
+#'     - \code{sc_ref} If \code{"sc_ref"} was requested in the \code{type} option, a matrix of the single channel spectrum of the reference (otherwise set to \code{NULL}).
+#'     - \code{ig_sample} If \code{"ig_sample"} was requested in the \code{type} option, a matrix of the interferogram of the sample (otherwise set to \code{NULL}).
+#'     - \code{ig_ref}  If \code{"ig_ref"} was requested in the \code{type} option, a matrix of the interferogram of the reference (otherwise set to \code{NULL}).
+#'     - \code{wavenumbers} If \code{"spec"} or \code{"spec_no_bc"} was requested in the \code{type} option, a numeric vector of the wavenumbers of the spectrum of the sample (otherwise set to \code{NULL}).
+#'     - \code{wavenumbers_sc_sample} If \code{"sc_sample"} was requested in the \code{type} option, a numeric vector of the wavenumbers of the single channel spectrum of the sample (otherwise set to \code{NULL}).
+#'     - \code{wavenumbers_sc_ref} If \code{"sc_ref"} was requested in the \code{type} option, a numeric vector of the wavenumbers of the single channel spectrum of the reference (otherwise set to \code{NULL}).
+
 #'
 #'  - If `simplify = TRUE`, a list of two elements is returned:
 #'     - `wavenumbers`: Numeric vector with wavenumbers of the requested spectra.
@@ -57,7 +52,7 @@
 #'
 opus_read <- function(
   file,
-  type = "spc",
+  type = "spec",
   simplify = FALSE,
   wns_digits = 1L,
   progress = TRUE,
@@ -103,7 +98,7 @@ opus_read <- function(
         stop("
              Simple output is currently only implemented for one value of the `type` option.\n
              A workaround this limitation is to use the `lapply` function, e.g.:\n\n
-             lapply(c('spc', 'ScRf'), function(x) read_opus(file, type = x, simplify = TRUE))
+             lapply(c('spec', 'sc_ref'), function(x) read_opus(file, type = x, simplify = TRUE))
              ")
       }
 
@@ -126,22 +121,22 @@ opus_read <- function(
         function(x) {
 
           id <- switch(type,
-            spc = "spc",
-            spc_nocomp = "spc_nocomp",
-            ScSm = "sc_sm",
-            ScRf = "sc_rf",
-            IgSm = "ig_sm",
-            IgRf = "ig_rf"
+            spec = "spec",
+            spec_no_bc = "spec_no_bc",
+            sc_sample = "sc_sample",
+            sc_ref = "sc_ref",
+            ig_sample = "ig_sample",
+            ig_ref = "ig_ref"
           )
 
           # Grab correct wavenumbers for interpolation
           wn <- switch(type,
-            spc = x$wavenumbers,
-            spc_nocomp = x$wavenumbers,
-            ScSm = x$wavenumbers_sc_sm,
-            ScRf = x$wavenumbers_sc_rf,
-            IgSm = x$wavenumbers_sc_sm,
-            IgRf = x$wavenumbers_sc_rf
+            spec = x$wavenumbers,
+            spec_no_bc = x$wavenumbers,
+            sc_sample = x$wavenumbers_sc_sample,
+            sc_ref = x$wavenumbers_sc_ref,
+            ig_sample = x$wavenumbers_sc_sample,
+            ig_ref = x$wavenumbers_sc_ref
           )
 
           # Linear interpolation to get spectra at rounded wavenumber

@@ -6,28 +6,37 @@
 #'
 #' @param rw a raw vector
 #' @param type Character vector of spectra types to extract from OPUS binary
-#' file. Default is \code{"spc"}, which will extract the final spectra, e.g.
+#' file. Default is \code{"spec"}, which will extract the final spectra, e.g.
 #' expressed in absorbance (named \code{AB} in Bruker OPUS programs). Possible
-#' additional values for the character vector supplied to \code{type} are \code{"spc_nocomp"} (spectrum of the sample without background correction),
-#' \code{"ScSm"} (single channel spectrum of the sample measurement), \
-#' code{"ScRf"} (single channel spectrum of the reference measurment),
-#' \code{"IgSm"} (interferogram of the sample measurment) and \code{"IgRf"}
+#' additional values for the character vector supplied to \code{type} are \code{"spec_no_bc"} (spectrum of the sample without background correction),
+#' \code{"sc_sample"} (single channel spectrum of the sample measurement), \
+#' code{"sc_ref"} (single channel spectrum of the reference measurement),
+#' \code{"ig_sample"} (interferogram of the sample measurement) and \code{"ig_ref"}
 #' (interferogram of the reference measurement).
 #' @param atm_comp_minus4offset Logical whether spectra after atmospheric
 #' compensation are read with an offset of \code{-4} bites from Bruker OPUS
 #' files. Default is \code{FALSE}.
 #'
+#' @details The type of spectra returned by the function when using `type = "spec"` depends on the setting of the Bruker instrumet: typically, it can be either absorbance or reflectance.
+#'
+#' Note that the type of spectra to extract from the OPUS file in Bruker's OPUS software follows the following correspondance:
+#'
+#' - `ScSm` corresponds to `sc_sample`
+#' - `ScRf` corresponds to `sc_ref`
+#' - `IgSm` corresponds to `ig_sample`
+#' - `IgRf` corresponds to `ig_ref`
+#'
 #' @return a list of 10 elements:
 #'     - \code{metadata}: a \code{data.frame} containing metadata from the OPUS file
-#'     - \code{spc} If \code{"spc"} was requested in the \code{type} option, a matrix of the spectrum of the sample (otherwise set to \code{NULL}).
-#'     - \code{spc_nocomp} If \code{"spc_nocomp"} was requested in the \code{type} option, a matrix of the spectrum of the sample without background correction (otherwise set to \code{NULL}).
-#'     - \code{sc_sm} If \code{"ScSm"} was requested in the \code{type} option, a matrix of the single channel spectrum of the sample (otherwise set to \code{NULL}).
-#'     - \code{sc_rf} If \code{"ScRf"} was requested in the \code{type} option, a matrix of the single channel spectrum of the reference (otherwise set to \code{NULL}).
-#'     - \code{ig_sm} If \code{"IgSm"} was requested in the \code{type} option, a matrix of the interferogram of the sample (otherwise set to \code{NULL}).
-#'     - \code{ig_rf}  If \code{"IgRf"} was requested in the \code{type} option, a matrix of the interferogram of the reference (otherwise set to \code{NULL}).
-#'     - \code{wavenumbers} If \code{"spc"} was requested in the \code{type} option, a numeric vector of the wavenumbers of the spectrum of the sample (otherwise set to \code{NULL}).
-#'     - \code{wavenumbers_sc_sm} If \code{"ScSm"} was requested in the \code{type} option, a numeric vector of the wavenumbers of the single channel spectrum of the sample (otherwise set to \code{NULL}).
-#'     - \code{wavenumbers_sc_rf} If \code{"ScRf"} was requested in the \code{type} option, a numeric vector of the wavenumbers of the single channel spectrum of the reference (otherwise set to \code{NULL}).
+#'     - \code{spec} If \code{"spec"} was requested in the \code{type} option, a matrix of the spectrum of the sample (otherwise set to \code{NULL}).
+#'     - \code{spec_no_bc} If \code{"spec_no_bc"} was requested in the \code{type} option, a matrix of the spectrum of the sample without background correction (otherwise set to \code{NULL}).
+#'     - \code{sc_sample} If \code{"sc_sample"} was requested in the \code{type} option, a matrix of the single channel spectrum of the sample (otherwise set to \code{NULL}).
+#'     - \code{sc_ref} If \code{"sc_ref"} was requested in the \code{type} option, a matrix of the single channel spectrum of the reference (otherwise set to \code{NULL}).
+#'     - \code{ig_sample} If \code{"ig_sample"} was requested in the \code{type} option, a matrix of the interferogram of the sample (otherwise set to \code{NULL}).
+#'     - \code{ig_ref}  If \code{"ig_ref"} was requested in the \code{type} option, a matrix of the interferogram of the reference (otherwise set to \code{NULL}).
+#'     - \code{wavenumbers} If \code{"spec"} or \code{"spec_no_bc"} was requested in the \code{type} option, a numeric vector of the wavenumbers of the spectrum of the sample (otherwise set to \code{NULL}).
+#'     - \code{wavenumbers_sc_sample} If \code{"sc_sample"} was requested in the \code{type} option, a numeric vector of the wavenumbers of the single channel spectrum of the sample (otherwise set to \code{NULL}).
+#'     - \code{wavenumbers_sc_ref} If \code{"sc_ref"} was requested in the \code{type} option, a numeric vector of the wavenumbers of the single channel spectrum of the reference (otherwise set to \code{NULL}).
 #'
 #' @importFrom stats setNames
 #' @export
@@ -36,12 +45,23 @@
 #'
 opus_read_raw <- function(
   rw,
-  type = "spc",
+  type = "spec",
   atm_comp_minus4offset = FALSE
 ) {
 
+  # Silently support and convert the default Bruker values
+  type <- switch (type,
+    "spc" = "spec", # for backwards compatibility
+    "spc_nocomp" = "spec_no_bc", # for backwards compatibility
+    "ScSm" = "sc_sample",
+    "ScRf" = "sc_ref",
+    "IgSm" = "ig_sample",
+    "IgRf" = "ig_ref",
+    type
+  )
+
   # Sanity check on `type`
-  if (!all(type %in% c("spc", "spc_nocomp", "ScSm", "ScRf", "IgSm", "IgRf"))) {
+  if (!all(type %in% c("spec", "spec_no_bc", "sc_sample", "sc_ref", "ig_sample", "ig_ref"))) {
     stop("Invalid value for the `type` option.", call. = FALSE)
   }
 
@@ -312,7 +332,7 @@ opus_read_raw <- function(
     }
   )
 
-  ## Assigning list of intially read spectra depending on block type ===========
+  ## Assigning list of initially read spectra depending on block type ===========
 
   # Assign an index name to the spectra and parameters for reading
   names(end_spc) <- paste0("idx", 1:length(end_spc))
@@ -329,17 +349,17 @@ opus_read_raw <- function(
   } else if (length(which_Ig) == 1) {
     list(
       spc_idx = names(which_Ig),
-      spc_code = "IgSm"
+      spc_code = "ig_sample"
     )
   } else if (length(which_Ig) == 3) {
     list(
       spc_idx = names(which_Ig)[c(1, 3)],
-      spc_code = c("IgSm", "IgRf")
+      spc_code = c("ig_sample", "ig_ref")
     )
   } else {
     list(
       spc_idx = names(which_Ig),
-      spc_code = c("IgSm", "IgRf")
+      spc_code = c("ig_sample", "ig_ref")
     )
   }
 
@@ -424,12 +444,12 @@ opus_read_raw <- function(
   } else if (length(which_Sc) == 1) {
     list(
       spc_idx = which_Sc,
-      spc_code = "ScSm"
+      spc_code = "sc_sample"
     )
   } else {
     list(
       spc_idx = which_Sc,
-      spc_code = c("ScSm", "ScRf")
+      spc_code = c("sc_sample", "sc_ref")
     )
   }
 
@@ -446,12 +466,12 @@ opus_read_raw <- function(
   AB_assigned <- if (length(which_AB) == 1) {
     list(
       spc_idx = which_AB,
-      spc_code = "spc"
+      spc_code = "spec"
     )
   } else {
     list(
       spc_idx = which_AB,
-      spc_code = c("spc_nocomp", "spc")
+      spc_code = c("spec_no_bc", "spec")
     )
   }
 
@@ -510,18 +530,18 @@ opus_read_raw <- function(
 
   # Read with new offset when first value of
   # ScSm  single channel sample spectrumspectrum is 0 and replace previous ---
-  if (any(names(spc) %in% "ScSm" & spc[["ScSm"]][1] == 0)) {
+  if (any(names(spc) %in% "sc_sample" & spc[["sc_sample"]][1] == 0)) {
     seek(
       con,
-      end_spc[Sc_assigned$spc_idx[Sc_assigned$spc_code == "ScSm"]],
+      end_spc[Sc_assigned$spc_idx[Sc_assigned$spc_code == "sc_sample"]],
       origin = "start",
       rw = "read"
     )
-    spc[["ScSm"]] <- readBin(
+    spc[["sc_sample"]] <- readBin(
       con,
       what = "numeric",
       # n = NPT_spc[Sc_assigned$spc_idx[Sc_assigned$spc_code == "ScSm"]] * 4,
-      n = NPT_spc[Sc_assigned$spc_idx[Sc_assigned$spc_code == "ScSm"]],
+      n = NPT_spc[Sc_assigned$spc_idx[Sc_assigned$spc_code == "sc_sample"]],
       size = 4,
       endian = "little"
     )
@@ -880,75 +900,75 @@ opus_read_raw <- function(
   out <- list(
     # Metadata
     'metadata' = metadata,
-    'spc' = if("spc" %in% type) {
-        if ("spc" %in% names(spc_m)) {
-          spc_m[["spc"]]
+    'spec' = if("spec" %in% type) {
+        if ("spec" %in% names(spc_m)) {
+          spc_m[["spec"]]
         } else {
-          warning("No 'spc' spectra found", call. = FALSE)
+          warning("No spectra found", call. = FALSE)
           NULL
         }
       } else {
         NULL
       },
-    'spc_nocomp' = if ("spc_nocomp" %in% type) {
-        if ("spc_nocomp" %in% names(spc_m)) {
-          spc_m[["spc_nocomp"]]
+    'spec_no_bc' = if ("spec_no_bc" %in% type) {
+        if ("spec_no_bc" %in% names(spc_m)) {
+          spc_m[["spec_no_bc"]]
         } else {
-          warning("No 'spc_nocomp' spectra found", call. = FALSE)
+          warning("No 'spec_no_bc' spectra found", call. = FALSE)
           NULL
         }
     } else {
       NULL
     },
-    'sc_sm' = if ("ScSm" %in% type) {
-        if ("ScSm" %in% names(spc_m)) {
-          spc_m[["ScSm"]]
+    'sc_sample' = if ("sc_sample" %in% type) {
+        if ("sc_sample" %in% names(spc_m)) {
+          spc_m[["sc_sample"]]
         } else {
-          warning("No 'ScSm' spectra found", call. = FALSE)
+          warning("No 'sc_sample' spectra found", call. = FALSE)
           NULL
         }
     } else {
       NULL
     },
-    'sc_rf' = if ("ScRf" %in% type) {
-        if ("ScRf" %in% names(spc_m)) {
-          spc_m[["ScRf"]]
+    'sc_ref' = if ("sc_ref" %in% type) {
+        if ("sc_ref" %in% names(spc_m)) {
+          spc_m[["sc_ref"]]
         } else {
-          warning("No 'ScRf' spectra found", call. = FALSE)
+          warning("No 'sc_ref' spectra found", call. = FALSE)
           NULL
         }
     } else {
       NULL
     },
-    'ig_sm' = if ("IgSm" %in% type) {
-        if ("IgSm" %in% names(spc_m)) {
-          spc_m[["IgSm"]]
+    'ig_sample' = if ("ig_sample" %in% type) {
+        if ("ig_sample" %in% names(spc_m)) {
+          spc_m[["ig_sample"]]
         } else {
-          warning("No 'IgSm' spectra found", call. = FALSE)
+          warning("No 'ig_sample' spectra found", call. = FALSE)
           NULL
         }
     } else {
       NULL
     },
-    'ig_rf' = if ("IgRf" %in% type) {
-        if("IgRf" %in% names(spc_m)) {
-          spc_m[["IgRf"]]
+    'ig_ref' = if ("ig_ref" %in% type) {
+        if("ig_ref" %in% names(spc_m)) {
+          spc_m[["ig_ref"]]
         } else {
-          warning("No 'IgRf' spectra found", call. = FALSE)
+          warning("No 'ig_ref' spectra found", call. = FALSE)
           NULL
         }
     } else {
       NULL
     },
     # Wavenumbers of final AB spectra
-    wavenumbers = wavenumbers[["spc"]],
-    wavenumbers_sc_sm = if ("ScSm" %in% type) {
-      wavenumbers[["ScSm"]]
+    wavenumbers = wavenumbers[["spec"]],
+    wavenumbers_sc_sample = if ("sc_sample" %in% type) {
+      wavenumbers[["sc_sample"]]
     } else {
       NULL
     },
-    wavenumbers_sc_rf = if ("ScRf" %in% type) {
-      wavenumbers[["ScRf"]]
+    wavenumbers_sc_ref = if ("sc_ref" %in% type) {
+      wavenumbers[["sc_ref"]]
     } else {
       NULL
     }
