@@ -10,13 +10,13 @@ test_that("reading different spectral elements works", {
 
   fn <- opus_file()
 
-  spec <- opus_read(file = fn, extract = "spc", progress = FALSE)
+  spec <- opus_read(file = fn, type = "spc", progress = FALSE)
   expect_true(!is.null(spec$spc))
 
-  spec <- opus_read(file = fn, extract = "ScSm", progress = FALSE)
+  spec <- opus_read(file = fn, type = "ScSm", progress = FALSE)
   expect_true(!is.null(spec$sc_sm))
 
-  spec <- opus_read(file = fn, extract = "ScRf", progress = FALSE)
+  spec <- opus_read(file = fn, type = "ScRf", progress = FALSE)
   expect_true(!is.null(spec$sc_rf))
 
 })

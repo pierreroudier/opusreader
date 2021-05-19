@@ -4,10 +4,10 @@
 #' Read file(s) acquired with a Bruker Vertex FTIR Instrument.
 #'
 #' @param file Character vector with path to file(s).
-#' @param extract Character vector of spectra types to extract from OPUS binary file.
+#' @param type Character vector of spectra types to extract from OPUS binary file.
 #'   Default is `"spc"`, which will extract the final spectra, e.g. expressed in absorbance
 #'   (named `AB` in Bruker OPUS program). Possible  additional values for the character vector
-#'   supplied to extract are `"spc_nocomp"` (spectrum of the sample without background correction),
+#'   supplied to \code{type} are `"spc_nocomp"` (spectrum of the sample without background correction),
 #'   `"ScSm"` (single channel spectrum of the sample measurement), `ScRf` (single channel spectrum
 #'   of the reference measurement), `"IgSm"` (interferogram of the sample measurement) and `"IgRf"`
 #'   (interferogram of the reference measurement).
@@ -27,27 +27,27 @@
 #'
 #'  - If `simplify = FALSE` (default), `opus_read()` returns a list of 10 elements:
 #'     - `metadata`: A data.frame containing metadata from the OPUS file.
-#'     - `spc`: If `extract = "spc"`, a matrix of the spectrum of the sample (otherwise set to `NULL`).
-#'     - `spc_nocomp`: If `extract = "spc_nocomp"`, a matrix of the spectrum of the sample without
+#'     - `spc`: If `type = "spc"`, a matrix of the spectrum of the sample (otherwise set to `NULL`).
+#'     - `spc_nocomp`: If `type = "spc_nocomp"`, a matrix of the spectrum of the sample without
 #'       background correction (otherwise set to `NULL`).
-#'     - `sc_sm`: If `extract = "ScSm"`, a matrix with the single channel spectrum of the sample
+#'     - `sc_sm`: If `type = "ScSm"`, a matrix with the single channel spectrum of the sample
 #'       (otherwise set to `NULL`).
-#'     - `sc_rf`: If `extract = "ScRf"`, a matrix with the single channel spectrum of the reference
+#'     - `sc_rf`: If `type = "ScRf"`, a matrix with the single channel spectrum of the reference
 #'       (otherwise set to `NULL`).
-#'     - `ig_sm`: If `extract = "IgSm"`, a matrix with the interferogram of the sample
+#'     - `ig_sm`: If `type = "IgSm"`, a matrix with the interferogram of the sample
 #'       (otherwise set to `NULL`).
-#'     - `ig_rf`: If `extract = "IgRf"`, a matrix with the interferogram of the reference
+#'     - `ig_rf`: If `type = "IgRf"`, a matrix with the interferogram of the reference
 #'       (otherwise set to `NULL`).
-#'     - `wavenumbers`:  If `extract = "spc"`, a numeric vector with the wavenumbers of the sample
+#'     - `wavenumbers`:  If `type = "spc"`, a numeric vector with the wavenumbers of the sample
 #'       spectrum (otherwise set to `NULL`).
-#'     - `wavenumbers_sc_sm`: If `extract = "ScSm"`, a numeric vector of the wavenumbers of the
+#'     - `wavenumbers_sc_sm`: If `type = "ScSm"`, a numeric vector of the wavenumbers of the
 #'       single channel spectrum of the sample (otherwise set to `NULL`).
-#'     - `wavenumbers_sc_rf`: If `extract = "ScRf"`, a numeric vector with the wavenumbers of the
+#'     - `wavenumbers_sc_rf`: If `type = "ScRf"`, a numeric vector with the wavenumbers of the
 #'       single channel spectrum of the reference (otherwise set to `NULL`).
 #'
 #'  - If `simplify = TRUE`, a list of two elements is returned:
 #'     - `wavenumbers`: Numeric vector with wavenumbers of the requested spectra.
-#'     - `spectra`: Matrix with spectra of requested type (see argument `extract`).
+#'     - `spectra`: Matrix with spectra of requested type (see argument `type`).
 #'
 #' @include opus_read_raw.R
 #' @importFrom stats approx
@@ -57,7 +57,7 @@
 #'
 opus_read <- function(
   file,
-  extract = "spc",
+  type = "spc",
   simplify = FALSE,
   wns_digits = 1L,
   progress = TRUE,
@@ -73,7 +73,7 @@ opus_read <- function(
 
         # Get raw vector
         rw <- readBin(fn, "raw", 1e5)
-        out <- opus_read_raw(rw, extract = extract, atm_comp_minus4offset = atm_comp_minus4offset)
+        out <- opus_read_raw(rw, type = type, atm_comp_minus4offset = atm_comp_minus4offset)
 
         return(out)
       })
@@ -86,7 +86,7 @@ opus_read <- function(
 
         # Get raw vector
         rw <- readBin(fn, "raw", 1e5)
-        out <- opus_read_raw(rw, extract = extract, atm_comp_minus4offset = atm_comp_minus4offset)
+        out <- opus_read_raw(rw, type = type, atm_comp_minus4offset = atm_comp_minus4offset)
 
         return(out)
       })
@@ -99,11 +99,11 @@ opus_read <- function(
     # If a simplified output ( = spectra matrix) was requested
     if (simplify) {
 
-      if (length(extract) > 1) {
+      if (length(type) > 1) {
         stop("
-             Simple output is currently only implemented for one value of the extract option.\n
+             Simple output is currently only implemented for one value of the `type` option.\n
              A workaround this limitation is to use the `lapply` function, e.g.:\n\n
-             lapply(c('spc', 'ScRf'), function(x) read_opus(file, extract = x, simplify = TRUE))
+             lapply(c('spc', 'ScRf'), function(x) read_opus(file, type = x, simplify = TRUE))
              ")
       }
 
@@ -125,7 +125,7 @@ opus_read <- function(
         res,
         function(x) {
 
-          id <- switch(extract,
+          id <- switch(type,
             spc = "spc",
             spc_nocomp = "spc_nocomp",
             ScSm = "sc_sm",
@@ -135,7 +135,7 @@ opus_read <- function(
           )
 
           # Grab correct wavenumbers for interpolation
-          wn <- switch(extract,
+          wn <- switch(type,
             spc = x$wavenumbers,
             spc_nocomp = x$wavenumbers,
             ScSm = x$wavenumbers_sc_sm,

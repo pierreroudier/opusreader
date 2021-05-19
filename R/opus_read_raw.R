@@ -5,10 +5,10 @@
 #' Bruker Vertex FTIR Instrument
 #'
 #' @param rw a raw vector
-#' @param extract Character vector of spectra types to extract from OPUS binary
+#' @param type Character vector of spectra types to extract from OPUS binary
 #' file. Default is \code{"spc"}, which will extract the final spectra, e.g.
 #' expressed in absorbance (named \code{AB} in Bruker OPUS programs). Possible
-#' additional values for the character vector supplied to extract are \code{"spc_nocomp"} (spectrum of the sample without background correction),
+#' additional values for the character vector supplied to \code{type} are \code{"spc_nocomp"} (spectrum of the sample without background correction),
 #' \code{"ScSm"} (single channel spectrum of the sample measurement), \
 #' code{"ScRf"} (single channel spectrum of the reference measurment),
 #' \code{"IgSm"} (interferogram of the sample measurment) and \code{"IgRf"}
@@ -19,15 +19,15 @@
 #'
 #' @return a list of 10 elements:
 #'     - \code{metadata}: a \code{data.frame} containing metadata from the OPUS file
-#'     - \code{spc} If \code{"spc"} was requested in the \code{extract} option, a matrix of the spectrum of the sample (otherwise set to \code{NULL}).
-#'     - \code{spc_nocomp} If \code{"spc_nocomp"} was requested in the \code{extract} option, a matrix of the spectrum of the sample without background correction (otherwise set to \code{NULL}).
-#'     - \code{sc_sm} If \code{"ScSm"} was requested in the \code{extract} option, a matrix of the single channel spectrum of the sample (otherwise set to \code{NULL}).
-#'     - \code{sc_rf} If \code{"ScRf"} was requested in the \code{extract} option, a matrix of the single channel spectrum of the reference (otherwise set to \code{NULL}).
-#'     - \code{ig_sm} If \code{"IgSm"} was requested in the \code{extract} option, a matrix of the interferogram of the sample (otherwise set to \code{NULL}).
-#'     - \code{ig_rf}  If \code{"IgRf"} was requested in the \code{extract} option, a matrix of the interferogram of the reference (otherwise set to \code{NULL}).
-#'     - \code{wavenumbers} If \code{"spc"} was requested in the \code{extract} option, a numeric vector of the wavenumbers of the spectrum of the sample (otherwise set to \code{NULL}).
-#'     - \code{wavenumbers_sc_sm} If \code{"ScSm"} was requested in the \code{extract} option, a numeric vector of the wavenumbers of the single channel spectrum of the sample (otherwise set to \code{NULL}).
-#'     - \code{wavenumbers_sc_rf} If \code{"ScRf"} was requested in the \code{extract} option, a numeric vector of the wavenumbers of the single channel spectrum of the reference (otherwise set to \code{NULL}).
+#'     - \code{spc} If \code{"spc"} was requested in the \code{type} option, a matrix of the spectrum of the sample (otherwise set to \code{NULL}).
+#'     - \code{spc_nocomp} If \code{"spc_nocomp"} was requested in the \code{type} option, a matrix of the spectrum of the sample without background correction (otherwise set to \code{NULL}).
+#'     - \code{sc_sm} If \code{"ScSm"} was requested in the \code{type} option, a matrix of the single channel spectrum of the sample (otherwise set to \code{NULL}).
+#'     - \code{sc_rf} If \code{"ScRf"} was requested in the \code{type} option, a matrix of the single channel spectrum of the reference (otherwise set to \code{NULL}).
+#'     - \code{ig_sm} If \code{"IgSm"} was requested in the \code{type} option, a matrix of the interferogram of the sample (otherwise set to \code{NULL}).
+#'     - \code{ig_rf}  If \code{"IgRf"} was requested in the \code{type} option, a matrix of the interferogram of the reference (otherwise set to \code{NULL}).
+#'     - \code{wavenumbers} If \code{"spc"} was requested in the \code{type} option, a numeric vector of the wavenumbers of the spectrum of the sample (otherwise set to \code{NULL}).
+#'     - \code{wavenumbers_sc_sm} If \code{"ScSm"} was requested in the \code{type} option, a numeric vector of the wavenumbers of the single channel spectrum of the sample (otherwise set to \code{NULL}).
+#'     - \code{wavenumbers_sc_rf} If \code{"ScRf"} was requested in the \code{type} option, a numeric vector of the wavenumbers of the single channel spectrum of the reference (otherwise set to \code{NULL}).
 #'
 #' @importFrom stats setNames
 #' @export
@@ -36,13 +36,13 @@
 #'
 opus_read_raw <- function(
   rw,
-  extract = "spc",
+  type = "spc",
   atm_comp_minus4offset = FALSE
 ) {
 
-  # Sanity check on `extract`
-  if (!all(extract %in% c("spc", "spc_nocomp", "ScSm", "ScRf", "IgSm", "IgRf"))) {
-    stop("Invalid value for the `extract` option.", call. = FALSE)
+  # Sanity check on `type`
+  if (!all(type %in% c("spc", "spc_nocomp", "ScSm", "ScRf", "IgSm", "IgRf"))) {
+    stop("Invalid value for the `type` option.", call. = FALSE)
   }
 
   # Avoid `R CMD check` NOTE: no visible binding for global variable ...
@@ -880,7 +880,7 @@ opus_read_raw <- function(
   out <- list(
     # Metadata
     'metadata' = metadata,
-    'spc' = if("spc" %in% extract) {
+    'spc' = if("spc" %in% type) {
         if ("spc" %in% names(spc_m)) {
           spc_m[["spc"]]
         } else {
@@ -890,7 +890,7 @@ opus_read_raw <- function(
       } else {
         NULL
       },
-    'spc_nocomp' = if ("spc_nocomp" %in% extract) {
+    'spc_nocomp' = if ("spc_nocomp" %in% type) {
         if ("spc_nocomp" %in% names(spc_m)) {
           spc_m[["spc_nocomp"]]
         } else {
@@ -900,7 +900,7 @@ opus_read_raw <- function(
     } else {
       NULL
     },
-    'sc_sm' = if ("ScSm" %in% extract) {
+    'sc_sm' = if ("ScSm" %in% type) {
         if ("ScSm" %in% names(spc_m)) {
           spc_m[["ScSm"]]
         } else {
@@ -910,7 +910,7 @@ opus_read_raw <- function(
     } else {
       NULL
     },
-    'sc_rf' = if ("ScRf" %in% extract) {
+    'sc_rf' = if ("ScRf" %in% type) {
         if ("ScRf" %in% names(spc_m)) {
           spc_m[["ScRf"]]
         } else {
@@ -920,7 +920,7 @@ opus_read_raw <- function(
     } else {
       NULL
     },
-    'ig_sm' = if ("IgSm" %in% extract) {
+    'ig_sm' = if ("IgSm" %in% type) {
         if ("IgSm" %in% names(spc_m)) {
           spc_m[["IgSm"]]
         } else {
@@ -930,7 +930,7 @@ opus_read_raw <- function(
     } else {
       NULL
     },
-    'ig_rf' = if ("IgRf" %in% extract) {
+    'ig_rf' = if ("IgRf" %in% type) {
         if("IgRf" %in% names(spc_m)) {
           spc_m[["IgRf"]]
         } else {
@@ -942,12 +942,12 @@ opus_read_raw <- function(
     },
     # Wavenumbers of final AB spectra
     wavenumbers = wavenumbers[["spc"]],
-    wavenumbers_sc_sm = if ("ScSm" %in% extract) {
+    wavenumbers_sc_sm = if ("ScSm" %in% type) {
       wavenumbers[["ScSm"]]
     } else {
       NULL
     },
-    wavenumbers_sc_rf = if ("ScRf" %in% extract) {
+    wavenumbers_sc_rf = if ("ScRf" %in% type) {
       wavenumbers[["ScRf"]]
     } else {
       NULL

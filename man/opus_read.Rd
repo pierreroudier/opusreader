@@ -6,7 +6,7 @@
 \usage{
 opus_read(
   file,
-  extract = "spc",
+  type = "spc",
   simplify = FALSE,
   wns_digits = 1L,
   progress = TRUE,
@@ -16,10 +16,10 @@ opus_read(
 \arguments{
 \item{file}{Character vector with path to file(s).}
 
-\item{extract}{Character vector of spectra types to extract from OPUS binary file.
+\item{type}{Character vector of spectra types to extract from OPUS binary file.
 Default is \code{"spc"}, which will extract the final spectra, e.g. expressed in absorbance
 (named \code{AB} in Bruker OPUS program). Possible  additional values for the character vector
-supplied to extract are \code{"spc_nocomp"} (spectrum of the sample without background correction),
+supplied to \code{type} are \code{"spc_nocomp"} (spectrum of the sample without background correction),
 \code{"ScSm"} (single channel spectrum of the sample measurement), \code{ScRf} (single channel spectrum
 of the reference measurement), \code{"IgSm"} (interferogram of the sample measurement) and \code{"IgRf"}
 (interferogram of the reference measurement).}
@@ -45,28 +45,28 @@ The output of \code{opus_read()} depends on the value of the \code{simplify} opt
 \item If \code{simplify = FALSE} (default), \code{opus_read()} returns a list of 10 elements:
 \itemize{
 \item \code{metadata}: A data.frame containing metadata from the OPUS file.
-\item \code{spc}: If \code{extract = "spc"}, a matrix of the spectrum of the sample (otherwise set to \code{NULL}).
-\item \code{spc_nocomp}: If \code{extract = "spc_nocomp"}, a matrix of the spectrum of the sample without
+\item \code{spc}: If \code{type = "spc"}, a matrix of the spectrum of the sample (otherwise set to \code{NULL}).
+\item \code{spc_nocomp}: If \code{type = "spc_nocomp"}, a matrix of the spectrum of the sample without
 background correction (otherwise set to \code{NULL}).
-\item \code{sc_sm}: If \code{extract = "ScSm"}, a matrix with the single channel spectrum of the sample
+\item \code{sc_sm}: If \code{type = "ScSm"}, a matrix with the single channel spectrum of the sample
 (otherwise set to \code{NULL}).
-\item \code{sc_rf}: If \code{extract = "ScRf"}, a matrix with the single channel spectrum of the reference
+\item \code{sc_rf}: If \code{type = "ScRf"}, a matrix with the single channel spectrum of the reference
 (otherwise set to \code{NULL}).
-\item \code{ig_sm}: If \code{extract = "IgSm"}, a matrix with the interferogram of the sample
+\item \code{ig_sm}: If \code{type = "IgSm"}, a matrix with the interferogram of the sample
 (otherwise set to \code{NULL}).
-\item \code{ig_rf}: If \code{extract = "IgRf"}, a matrix with the interferogram of the reference
+\item \code{ig_rf}: If \code{type = "IgRf"}, a matrix with the interferogram of the reference
 (otherwise set to \code{NULL}).
-\item \code{wavenumbers}:  If \code{extract = "spc"}, a numeric vector with the wavenumbers of the sample
+\item \code{wavenumbers}:  If \code{type = "spc"}, a numeric vector with the wavenumbers of the sample
 spectrum (otherwise set to \code{NULL}).
-\item \code{wavenumbers_sc_sm}: If \code{extract = "ScSm"}, a numeric vector of the wavenumbers of the
+\item \code{wavenumbers_sc_sm}: If \code{type = "ScSm"}, a numeric vector of the wavenumbers of the
 single channel spectrum of the sample (otherwise set to \code{NULL}).
-\item \code{wavenumbers_sc_rf}: If \code{extract = "ScRf"}, a numeric vector with the wavenumbers of the
+\item \code{wavenumbers_sc_rf}: If \code{type = "ScRf"}, a numeric vector with the wavenumbers of the
 single channel spectrum of the reference (otherwise set to \code{NULL}).
 }
 \item If \code{simplify = TRUE}, a list of two elements is returned:
 \itemize{
 \item \code{wavenumbers}: Numeric vector with wavenumbers of the requested spectra.
-\item \code{spectra}: Matrix with spectra of requested type (see argument \code{extract}).
+\item \code{spectra}: Matrix with spectra of requested type (see argument \code{type}).
 }
 }
 }
