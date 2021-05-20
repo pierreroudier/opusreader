@@ -13,13 +13,13 @@ opus_read_raw(rw, type = "spec", atm_comp_minus4offset = FALSE)
 file. Default is \code{"spec"}, which will extract the final spectra, e.g.
 expressed in absorbance (named \code{AB} in Bruker OPUS programs). Possible
 additional values for the character vector supplied to \code{type} are \code{"spec_no_bc"} (spectrum of the sample without background correction),
-\code{"sc_sample"} (single channel spectrum of the sample measurement), \
-code{"sc_ref"} (single channel spectrum of the reference measurement),
+\code{"sc_sample"} (single channel spectrum of the sample measurement),
+\code{"sc_ref"} (single channel spectrum of the reference measurement),
 \code{"ig_sample"} (interferogram of the sample measurement) and \code{"ig_ref"}
 (interferogram of the reference measurement).}
 
 \item{atm_comp_minus4offset}{Logical whether spectra after atmospheric
-compensation are read with an offset of \code{-4} bites from Bruker OPUS
+compensation are read with an offset of -4 bytes from Bruker OPUS
 files. Default is \code{FALSE}.}
 }
 \value{
@@ -40,9 +40,9 @@ Read single binary acquired with an
 Bruker Vertex FTIR Instrument
 }
 \details{
-The type of spectra returned by the function when using \code{type = "spec"} depends on the setting of the Bruker instrumet: typically, it can be either absorbance or reflectance.
+The type of spectra returned by the function when using \code{type = "spec"} depends on the setting of the Bruker instrument: typically, it can be either absorbance or reflectance.
 
-Note that the type of spectra to extract from the OPUS file in Bruker's OPUS software follows the following correspondance:
+The type of spectra to extract from the file can also use Bruker's OPUS software naming conventions, as follows:
 \itemize{
 \item \code{ScSm} corresponds to \code{sc_sample}
 \item \code{ScRf} corresponds to \code{sc_ref}

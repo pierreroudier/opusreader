@@ -6,16 +6,16 @@
 #'
 #' @param rw a raw vector
 #' @param type Character vector of spectra types to extract from OPUS binary
-#' file. Default is \code{"spec"}, which will extract the final spectra, e.g.
-#' expressed in absorbance (named \code{AB} in Bruker OPUS programs). Possible
-#' additional values for the character vector supplied to \code{type} are \code{"spec_no_bc"} (spectrum of the sample without background correction),
-#' \code{"sc_sample"} (single channel spectrum of the sample measurement), \
-#' code{"sc_ref"} (single channel spectrum of the reference measurement),
-#' \code{"ig_sample"} (interferogram of the sample measurement) and \code{"ig_ref"}
+#' file. Default is `"spec"`, which will extract the final spectra, e.g.
+#' expressed in absorbance (named `AB` in Bruker OPUS programs). Possible
+#' additional values for the character vector supplied to `type` are `"spec_no_bc"` (spectrum of the sample without background correction),
+#' `"sc_sample"` (single channel spectrum of the sample measurement),
+#' `"sc_ref"` (single channel spectrum of the reference measurement),
+#' `"ig_sample"` (interferogram of the sample measurement) and `"ig_ref"`
 #' (interferogram of the reference measurement).
 #' @param atm_comp_minus4offset Logical whether spectra after atmospheric
-#' compensation are read with an offset of \code{-4} bites from Bruker OPUS
-#' files. Default is \code{FALSE}.
+#' compensation are read with an offset of -4 bytes from Bruker OPUS
+#' files. Default is `FALSE`.
 #'
 #' @details The type of spectra returned by the function when using `type = "spec"` depends on the setting of the Bruker instrument: typically, it can be either absorbance or reflectance.
 #'
@@ -27,16 +27,16 @@
 #' - `IgRf` corresponds to `ig_ref`
 #'
 #' @return a list of 10 elements:
-#'     - \code{metadata}: a \code{data.frame} containing metadata from the OPUS file
-#'     - \code{spec} If \code{"spec"} was requested in the \code{type} option, a matrix of the spectrum of the sample (otherwise set to \code{NULL}).
-#'     - \code{spec_no_bc} If \code{"spec_no_bc"} was requested in the \code{type} option, a matrix of the spectrum of the sample without background correction (otherwise set to \code{NULL}).
-#'     - \code{sc_sample} If \code{"sc_sample"} was requested in the \code{type} option, a matrix of the single channel spectrum of the sample (otherwise set to \code{NULL}).
-#'     - \code{sc_ref} If \code{"sc_ref"} was requested in the \code{type} option, a matrix of the single channel spectrum of the reference (otherwise set to \code{NULL}).
-#'     - \code{ig_sample} If \code{"ig_sample"} was requested in the \code{type} option, a matrix of the interferogram of the sample (otherwise set to \code{NULL}).
-#'     - \code{ig_ref}  If \code{"ig_ref"} was requested in the \code{type} option, a matrix of the interferogram of the reference (otherwise set to \code{NULL}).
-#'     - \code{wavenumbers} If \code{"spec"} or \code{"spec_no_bc"} was requested in the \code{type} option, a numeric vector of the wavenumbers of the spectrum of the sample (otherwise set to \code{NULL}).
-#'     - \code{wavenumbers_sc_sample} If \code{"sc_sample"} was requested in the \code{type} option, a numeric vector of the wavenumbers of the single channel spectrum of the sample (otherwise set to \code{NULL}).
-#'     - \code{wavenumbers_sc_ref} If \code{"sc_ref"} was requested in the \code{type} option, a numeric vector of the wavenumbers of the single channel spectrum of the reference (otherwise set to \code{NULL}).
+#'     - `metadata`: a `data.frame` containing metadata from the OPUS file
+#'     - `spec` If `"spec"` was requested in the `type` option, a matrix of the spectrum of the sample (otherwise set to `NULL`).
+#'     - `spec_no_bc` If `"spec_no_bc"` was requested in the `type` option, a matrix of the spectrum of the sample without background correction (otherwise set to `NULL`).
+#'     - `sc_sample` If `"sc_sample"` was requested in the `type` option, a matrix of the single channel spectrum of the sample (otherwise set to `NULL`).
+#'     - `sc_ref` If `"sc_ref"` was requested in the `type` option, a matrix of the single channel spectrum of the reference (otherwise set to `NULL`).
+#'     - `ig_sample` If `"ig_sample"` was requested in the `type` option, a matrix of the interferogram of the sample (otherwise set to `NULL`).
+#'     - `ig_ref`  If `"ig_ref"` was requested in the `type` option, a matrix of the interferogram of the reference (otherwise set to `NULL`).
+#'     - `wavenumbers` If `"spec"` or `"spec_no_bc"` was requested in the `type` option, a numeric vector of the wavenumbers of the spectrum of the sample (otherwise set to `NULL`).
+#'     - `wavenumbers_sc_sample` If `"sc_sample"` was requested in the `type` option, a numeric vector of the wavenumbers of the single channel spectrum of the sample (otherwise set to `NULL`).
+#'     - `wavenumbers_sc_ref` If `"sc_ref"` was requested in the `type` option, a numeric vector of the wavenumbers of the single channel spectrum of the reference (otherwise set to `NULL`).
 #'
 #' @importFrom stats setNames
 #' @export
