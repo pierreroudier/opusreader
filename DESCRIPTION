@@ -17,8 +17,8 @@ Authors@R: c(
         comment = c(ORCID = "0000-0001-7431-2603")
     ))
 Description: This package implements a driver for FTIR spectroscopy data collected in the OPUS binary format.
-URL: http://github.com/pierreroudier/opusreader
-BugReports: http://github.com/pierreroudier/opusreader/issues
+URL: https://github.com/pierreroudier/opusreader
+BugReports: https://github.com/pierreroudier/opusreader/issues
 License: GPL-3 + file LICENSE
 Encoding: UTF-8
 LazyData: true
