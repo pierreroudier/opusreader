@@ -17,9 +17,9 @@
 #' compensation are read with an offset of \code{-4} bites from Bruker OPUS
 #' files. Default is \code{FALSE}.
 #'
-#' @details The type of spectra returned by the function when using `type = "spec"` depends on the setting of the Bruker instrumet: typically, it can be either absorbance or reflectance.
+#' @details The type of spectra returned by the function when using `type = "spec"` depends on the setting of the Bruker instrument: typically, it can be either absorbance or reflectance.
 #'
-#' Note that the type of spectra to extract from the OPUS file in Bruker's OPUS software follows the following correspondance:
+#' The type of spectra to extract from the file can also use Bruker's OPUS software naming conventions, as follows:
 #'
 #' - `ScSm` corresponds to `sc_sample`
 #' - `ScRf` corresponds to `sc_ref`

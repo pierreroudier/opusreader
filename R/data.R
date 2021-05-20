@@ -6,7 +6,7 @@
 #' @docType data
 #' @format A binary OPUS file
 #' @details The spectrum contained in this OPUS file was collected
-#' on a soil sample from New Zealand using a Brucker FTIR spectrometer.
+#' on a soil sample from New Zealand using a Bruker FTIR spectrometer.
 #'
 #' @examples
 #' # Access the location of the ASD file using the following command

@@ -12,7 +12,7 @@ This package implements a driver for FTIR spectroscopy data collected in the OPU
 
 ## Acknowledgement
 
-This package is a very simple fork from the `read_opus_bin_univ` from [the `simplerspec` package authored by Philipp Baumann](https://github.com/philipp-baumann/simplerspec), who deserves all of the credit for this contribution. Here the `simplerspec` functions are modified so they can read `raw` streams directly, and to keep the functions in a lighter package.
+This package is a fork from the `read_opus_bin_univ` from [the `simplerspec` package authored by Philipp Baumann](https://github.com/philipp-baumann/simplerspec), who deserves all of the credit for this contribution. Here the `simplerspec` functions are modified so they can read `raw` streams directly, and to keep the functionality in a lighter package. 
  
 ## Installation
 
@@ -22,7 +22,7 @@ You can use the `remotes` package to install `opusreader`:
 
 ## Basic usage
 
-The package includes a sample OPUS spectra for demonstration purposes. It slocation can be determined using the function `opus_file()`:
+The package includes a sample OPUS spectra for demonstration purposes. Its location can be determined using the function `opus_file()`:
 
 ```
 > opus_file()

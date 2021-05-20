@@ -25,6 +25,15 @@
 #' @param atm_comp_minus4offset Logical whether spectra after atmospheric compensation are read with
 #'   an offset of `-4` bytes from Bruker OPUS files. Default is `FALSE`.
 #'
+#' @details The type of spectra returned by the function when using `type = "spec"` depends on the setting of the Bruker instrument: typically, it can be either absorbance or reflectance.
+#'
+#' The type of spectra to extract from the file can also use Bruker's OPUS software naming conventions, as follows:
+#'
+#' - `ScSm` corresponds to `sc_sample`
+#' - `ScRf` corresponds to `sc_ref`
+#' - `IgSm` corresponds to `ig_sample`
+#' - `IgRf` corresponds to `ig_ref`
+#'
 #' @return The output of `opus_read()` depends on the value of the `simplify` option used in the function call.
 #'
 #'  - If `simplify = FALSE` (default), `opus_read()` returns a list of 10 elements:
