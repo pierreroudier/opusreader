@@ -8,8 +8,7 @@
 #' file. Default is `"spec"`, which will extract the final spectra, e.g.
 #' expressed in absorbance (named `AB` in Bruker OPUS programs). Possible
 #' additional values for the character vector supplied to `type` are `"spec_no_bc"` (spectrum of the sample without background correction),
-#' `"sc_sample"` (single channel spectrum of the sample measurement), \
-#' code{"sc_ref"` (single channel spectrum of the reference measurement),
+#' `"sc_sample"` (single channel spectrum of the sample measurement), `"sc_ref"` (single channel spectrum of the reference measurement),
 #' `"ig_sample"` (interferogram of the sample measurement) and `"ig_ref"`
 #' (interferogram of the reference measurement).
 #'

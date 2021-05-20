@@ -16,6 +16,14 @@ opus_read(
 \arguments{
 \item{file}{Character vector with path to file(s).}
 
+\item{type}{Character vector of spectra types to extract from OPUS binary
+file. Default is \code{"spec"}, which will extract the final spectra, e.g.
+expressed in absorbance (named \code{AB} in Bruker OPUS programs). Possible
+additional values for the character vector supplied to \code{type} are \code{"spec_no_bc"} (spectrum of the sample without background correction),
+\code{"sc_sample"} (single channel spectrum of the sample measurement), \code{"sc_ref"} (single channel spectrum of the reference measurement),
+\code{"ig_sample"} (interferogram of the sample measurement) and \code{"ig_ref"}
+(interferogram of the reference measurement).}
+
 \item{simplify}{Logical (defaults to \code{FALSE}): if set to \code{TRUE}, returns a flattened list.
 The first element of that list (\code{wavenumbers}) is the wavenumbers of the first file read.
 The second element (\code{spectra}) is a matrix of the corresponding spectra. Especially useful when
