@@ -16,7 +16,8 @@ Authors@R: c(
         email = "roudierp@landcareresearch.co.nz", 
         comment = c(ORCID = "0000-0001-7431-2603")
     ))
-Description: This package implements a driver for FTIR spectroscopy data collected in the OPUS binary format.
+Description: A driver and associated functions for FTIR spectroscopy data collected 
+  in the OPUS binary format, commonly used by Bruker spectrometers.
 URL: https://github.com/pierreroudier/opusreader
 BugReports: https://github.com/pierreroudier/opusreader/issues
 License: GPL-3 + file LICENSE
