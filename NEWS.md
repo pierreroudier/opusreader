@@ -11,7 +11,7 @@
 - Changed option name `extract` to `type` (https://github.com/pierreroudier/opusreader/issues/2)
 - Added test for simplified output
 - implemented correct resampling using wavenumbers based on spectra type (#11)
-- Removed occurences of `sapply` with `vapply` (#10)
+- Removed occurrences of `sapply` with `vapply` (#10)
 - added continuous integration using Github Actions
 
 
