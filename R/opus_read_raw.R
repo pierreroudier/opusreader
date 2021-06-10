@@ -89,30 +89,36 @@ opus_read_raw <- function(
   # (difference between "LXV" and "FXV" for a spectral data block
   # should be 16) --------------------------------------------------------------
   if (length(fxv_all) > length(lxv_all)) {
+
     diff_lxv_fxv <- lapply(lxv_all, function(x) x - fxv_all)
     # Return list of logical vectors indicating whether difference of fxv
     # and lxv is 16 (distance of 16 bytes)
-    lxv_fxv_min <- lapply(diff_lxv_fxv, function(x) x == 16)
-    fxv_list <- rep(list(fxv_all), length(fxv_all))
-    fxv_all <- mapply(function(x, y) {
-                        fxv_list[[x]][lxv_fxv_min[[y]]]
-                      },
-                      x = seq_along(fxv_list),
-                      y = seq_along(lxv_fxv_min))
+    idx_extra <- which(!(fxv_all + 16) %in% lxv_all)
+    fxv_all <- fxv_all[-idx_extra]
+
+    # lxv_fxv_min <- lapply(diff_lxv_fxv, function(x) x == 16)
+    # fxv_list <- rep(list(fxv_all), length(fxv_all))
+    # fxv_all <- mapply(function(x, y) {
+    #                     fxv_list[[x]][lxv_fxv_min[[y]]]
+    #                   },
+    #                   x = seq_along(fxv_list),
+    #                   y = seq_along(lxv_fxv_min))
   }
 
   if (length(lxv_all) > length(fxv_all)) {
     diff_fxv_lxv <- lapply(fxv_all, function(x) x - lxv_all)
     # Return list of logical vectors indicating whether difference of fxv
     # and lxv is 16 (distance of 16 bytes)
-    fxv_lxv_min <- lapply(diff_fxv_lxv, function(x) x == -16)
-    lxv_list <- rep(list(lxv_all), length(lxv_all))
+    idx_extra <- which(!(lxv_all - 16) %in% fxv_all)
+    lxv_all <- lxv_all[-idx_extra]
 
-    lxv_all <- mapply(function(x, y) {
-                        lxv_list[[x]][fxv_lxv_min[[y]]]
-                      },
-                      x = seq_along(lxv_list),
-                      y = seq_along(fxv_lxv_min))
+    # fxv_lxv_min <- lapply(diff_fxv_lxv, function(x) x == -16)
+    # lxv_list <- rep(list(lxv_all), length(lxv_all))
+    # lxv_all <- mapply(function(x, y) {
+    #                     lxv_list[[x]][fxv_lxv_min[[y]]]
+    #                   },
+    #                   x = seq_along(lxv_list),
+    #                   y = seq_along(fxv_lxv_min))
   }
 
   # Reduce size of npt_all -----------------------------------------------------
