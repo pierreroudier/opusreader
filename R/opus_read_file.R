@@ -7,7 +7,7 @@
 #' @param type Character vector of spectra types to extract from OPUS binary
 #' file. Default is `"spec"`, which will extract the final spectra, e.g.
 #' expressed in absorbance (named `AB` in Bruker OPUS programs). Possible
-#' additional values for the character vector supplied to `type` are `"spec_no_bc"` (spectrum of the sample without background correction),
+#' additional values for the character vector supplied to `type` are `"spec_no_atm_comp"` (spectrum of the sample without compensation for atmospheric gases H[2]O and/or CO[2]),
 #' `"sc_sample"` (single channel spectrum of the sample measurement), `"sc_ref"` (single channel spectrum of the reference measurement),
 #' `"ig_sample"` (interferogram of the sample measurement) and `"ig_ref"`
 #' (interferogram of the reference measurement).
@@ -38,12 +38,12 @@
 #'  - If `simplify = FALSE` (default), `opus_read()` returns a list of 10 elements:
 #'     - `metadata`: a `data.frame` containing metadata from the OPUS file
 #'     - `spec` If `"spec"` was requested in the `type` option, a matrix of the spectrum of the sample (otherwise set to `NULL`).
-#'     - `spec_no_bc` If `"spec_no_bc"` was requested in the `type` option, a matrix of the spectrum of the sample without background correction (otherwise set to `NULL`).
+#'     - `spec_no_atm_comp` If `"spec_no_atm_comp"` was requested in the `type` option, a matrix of the spectrum of the sample without background compensation (otherwise set to `NULL`).
 #'     - `sc_sample` If `"sc_sample"` was requested in the `type` option, a matrix of the single channel spectrum of the sample (otherwise set to `NULL`).
 #'     - `sc_ref` If `"sc_ref"` was requested in the `type` option, a matrix of the single channel spectrum of the reference (otherwise set to `NULL`).
 #'     - `ig_sample` If `"ig_sample"` was requested in the `type` option, a matrix of the interferogram of the sample (otherwise set to `NULL`).
 #'     - `ig_ref`  If `"ig_ref"` was requested in the `type` option, a matrix of the interferogram of the reference (otherwise set to `NULL`).
-#'     - `wavenumbers` If `"spec"` or `"spec_no_bc"` was requested in the `type` option, a numeric vector of the wavenumbers of the spectrum of the sample (otherwise set to `NULL`).
+#'     - `wavenumbers` If `"spec"` or `"spec_no_atm_comp"` was requested in the `type` option, a numeric vector of the wavenumbers of the spectrum of the sample (otherwise set to `NULL`).
 #'     - `wavenumbers_sc_sample` If `"sc_sample"` was requested in the `type` option, a numeric vector of the wavenumbers of the single channel spectrum of the sample (otherwise set to `NULL`).
 #'     - `wavenumbers_sc_ref` If `"sc_ref"` was requested in the `type` option, a numeric vector of the wavenumbers of the single channel spectrum of the reference (otherwise set to `NULL`).
 
@@ -130,7 +130,7 @@ opus_read <- function(
 
           id <- switch(type,
             spec = "spec",
-            spec_no_bc = "spec_no_bc",
+            spec_no_atm_comp = "spec_no_atm_comp",
             sc_sample = "sc_sample",
             sc_ref = "sc_ref",
             ig_sample = "ig_sample",
@@ -140,7 +140,7 @@ opus_read <- function(
           # Grab correct wavenumbers for interpolation
           wn <- switch(type,
             spec = x$wavenumbers,
-            spec_no_bc = x$wavenumbers,
+            spec_no_atm_comp = x$wavenumbers,
             sc_sample = x$wavenumbers_sc_sample,
             sc_ref = x$wavenumbers_sc_ref,
             ig_sample = x$wavenumbers_sc_sample,
