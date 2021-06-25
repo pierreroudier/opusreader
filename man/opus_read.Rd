@@ -19,7 +19,7 @@ opus_read(
 \item{type}{Character vector of spectra types to extract from OPUS binary
 file. Default is \code{"spec"}, which will extract the final spectra, e.g.
 expressed in absorbance (named \code{AB} in Bruker OPUS programs). Possible
-additional values for the character vector supplied to \code{type} are \code{"spec_no_bc"} (spectrum of the sample without background correction),
+additional values for the character vector supplied to \code{type} are \code{"spec_no_atm_comp"} (spectrum of the sample without compensation for atmospheric gases, water vapor and/or carbon dioxide),
 \code{"sc_sample"} (single channel spectrum of the sample measurement), \code{"sc_ref"} (single channel spectrum of the reference measurement),
 \code{"ig_sample"} (interferogram of the sample measurement) and \code{"ig_ref"}
 (interferogram of the reference measurement).}
@@ -46,12 +46,12 @@ The output of \code{opus_read()} depends on the value of the \code{simplify} opt
 \itemize{
 \item \code{metadata}: a \code{data.frame} containing metadata from the OPUS file
 \item \code{spec} If \code{"spec"} was requested in the \code{type} option, a matrix of the spectrum of the sample (otherwise set to \code{NULL}).
-\item \code{spec_no_bc} If \code{"spec_no_bc"} was requested in the \code{type} option, a matrix of the spectrum of the sample without background correction (otherwise set to \code{NULL}).
+\item \code{spec_no_atm_comp} If \code{"spec_no_atm_comp"} was requested in the \code{type} option, a matrix of the spectrum of the sample without background compensation (otherwise set to \code{NULL}).
 \item \code{sc_sample} If \code{"sc_sample"} was requested in the \code{type} option, a matrix of the single channel spectrum of the sample (otherwise set to \code{NULL}).
 \item \code{sc_ref} If \code{"sc_ref"} was requested in the \code{type} option, a matrix of the single channel spectrum of the reference (otherwise set to \code{NULL}).
 \item \code{ig_sample} If \code{"ig_sample"} was requested in the \code{type} option, a matrix of the interferogram of the sample (otherwise set to \code{NULL}).
 \item \code{ig_ref}  If \code{"ig_ref"} was requested in the \code{type} option, a matrix of the interferogram of the reference (otherwise set to \code{NULL}).
-\item \code{wavenumbers} If \code{"spec"} or \code{"spec_no_bc"} was requested in the \code{type} option, a numeric vector of the wavenumbers of the spectrum of the sample (otherwise set to \code{NULL}).
+\item \code{wavenumbers} If \code{"spec"} or \code{"spec_no_atm_comp"} was requested in the \code{type} option, a numeric vector of the wavenumbers of the spectrum of the sample (otherwise set to \code{NULL}).
 \item \code{wavenumbers_sc_sample} If \code{"sc_sample"} was requested in the \code{type} option, a numeric vector of the wavenumbers of the single channel spectrum of the sample (otherwise set to \code{NULL}).
 \item \code{wavenumbers_sc_ref} If \code{"sc_ref"} was requested in the \code{type} option, a numeric vector of the wavenumbers of the single channel spectrum of the reference (otherwise set to \code{NULL}).
 }

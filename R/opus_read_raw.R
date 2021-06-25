@@ -8,7 +8,7 @@
 #' @param type Character vector of spectra types to extract from OPUS binary
 #' file. Default is `"spec"`, which will extract the final spectra, e.g.
 #' expressed in absorbance (named `AB` in Bruker OPUS programs). Possible
-#' additional values for the character vector supplied to `type` are `"spec_no_bc"` (spectrum of the sample without background correction),
+#' additional values for the character vector supplied to `type` are `"spec_no_atm_comp"` (spectrum of the sample without compensation for atmospheric gases, water vapor and/or carbon dioxide),
 #' `"sc_sample"` (single channel spectrum of the sample measurement),
 #' `"sc_ref"` (single channel spectrum of the reference measurement),
 #' `"ig_sample"` (interferogram of the sample measurement) and `"ig_ref"`
@@ -29,12 +29,12 @@
 #' @return a list of 10 elements:
 #'     - `metadata`: a `data.frame` containing metadata from the OPUS file
 #'     - `spec` If `"spec"` was requested in the `type` option, a matrix of the spectrum of the sample (otherwise set to `NULL`).
-#'     - `spec_no_bc` If `"spec_no_bc"` was requested in the `type` option, a matrix of the spectrum of the sample without background correction (otherwise set to `NULL`).
+#'     - `spec_no_atm_comp` If `"spec_no_atm_comp"` was requested in the `type` option, a matrix of the spectrum of the sample without atmospheric compensation (otherwise set to `NULL`).
 #'     - `sc_sample` If `"sc_sample"` was requested in the `type` option, a matrix of the single channel spectrum of the sample (otherwise set to `NULL`).
 #'     - `sc_ref` If `"sc_ref"` was requested in the `type` option, a matrix of the single channel spectrum of the reference (otherwise set to `NULL`).
 #'     - `ig_sample` If `"ig_sample"` was requested in the `type` option, a matrix of the interferogram of the sample (otherwise set to `NULL`).
 #'     - `ig_ref`  If `"ig_ref"` was requested in the `type` option, a matrix of the interferogram of the reference (otherwise set to `NULL`).
-#'     - `wavenumbers` If `"spec"` or `"spec_no_bc"` was requested in the `type` option, a numeric vector of the wavenumbers of the spectrum of the sample (otherwise set to `NULL`).
+#'     - `wavenumbers` If `"spec"` or `"spec_no_atm_comp"` was requested in the `type` option, a numeric vector of the wavenumbers of the spectrum of the sample (otherwise set to `NULL`).
 #'     - `wavenumbers_sc_sample` If `"sc_sample"` was requested in the `type` option, a numeric vector of the wavenumbers of the single channel spectrum of the sample (otherwise set to `NULL`).
 #'     - `wavenumbers_sc_ref` If `"sc_ref"` was requested in the `type` option, a numeric vector of the wavenumbers of the single channel spectrum of the reference (otherwise set to `NULL`).
 #'
@@ -52,7 +52,7 @@ opus_read_raw <- function(
   # Silently support and convert the default Bruker values
   type <- switch (type,
     "spc" = "spec", # for backwards compatibility
-    "spc_nocomp" = "spec_no_bc", # for backwards compatibility
+    "spc_nocomp" = "spec_no_atm_comp", # for backwards compatibility
     "ScSm" = "sc_sample",
     "ScRf" = "sc_ref",
     "IgSm" = "ig_sample",
@@ -61,7 +61,7 @@ opus_read_raw <- function(
   )
 
   # Sanity check on `type`
-  if (!all(type %in% c("spec", "spec_no_bc", "sc_sample", "sc_ref", "ig_sample", "ig_ref"))) {
+  if (!all(type %in% c("spec", "spec_no_atm_comp", "sc_sample", "sc_ref", "ig_sample", "ig_ref"))) {
     stop("Invalid value for the `type` option.", call. = FALSE)
   }
 
@@ -460,7 +460,7 @@ opus_read_raw <- function(
   } else {
     list(
       spc_idx = which_AB,
-      spc_code = c("spec_no_bc", "spec")
+      spc_code = c("spec_no_atm_comp", "spec")
     )
   }
 
@@ -899,11 +899,11 @@ opus_read_raw <- function(
       } else {
         NULL
       },
-    'spec_no_bc' = if ("spec_no_bc" %in% type) {
-        if ("spec_no_bc" %in% names(spc_m)) {
-          spc_m[["spec_no_bc"]]
+    'spec_no_atm_comp' = if ("spec_no_atm_comp" %in% type) {
+        if ("spec_no_atm_comp" %in% names(spc_m)) {
+          spc_m[["spec_no_atm_comp"]]
         } else {
-          warning("No 'spec_no_bc' spectra found", call. = FALSE)
+          warning("No 'spec_no_atm_comp' spectra found", call. = FALSE)
           NULL
         }
     } else {
