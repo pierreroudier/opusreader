@@ -8,7 +8,7 @@
 #' @param type Character vector of spectra types to extract from OPUS binary
 #' file. Default is `"spec"`, which will extract the final spectra, e.g.
 #' expressed in absorbance (named `AB` in Bruker OPUS programs). Possible
-#' additional values for the character vector supplied to `type` are `"spec_no_atm_comp"` (spectrum of the sample without compensation for atmospheric gases H[2]O and/or CO[2]),
+#' additional values for the character vector supplied to `type` are `"spec_no_atm_comp"` (spectrum of the sample without compensation for atmospheric gases, water vapor and/or carbon dioxide),
 #' `"sc_sample"` (single channel spectrum of the sample measurement),
 #' `"sc_ref"` (single channel spectrum of the reference measurement),
 #' `"ig_sample"` (interferogram of the sample measurement) and `"ig_ref"`

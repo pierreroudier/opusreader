@@ -12,7 +12,7 @@ opus_read_raw(rw, type = "spec", atm_comp_minus4offset = FALSE)
 \item{type}{Character vector of spectra types to extract from OPUS binary
 file. Default is \code{"spec"}, which will extract the final spectra, e.g.
 expressed in absorbance (named \code{AB} in Bruker OPUS programs). Possible
-additional values for the character vector supplied to \code{type} are \code{"spec_no_atm_comp"} (spectrum of the sample without compensation for atmospheric gases H\link{2}O and/or CO\link{2}),
+additional values for the character vector supplied to \code{type} are \code{"spec_no_atm_comp"} (spectrum of the sample without compensation for atmospheric gases, water vapor and/or carbon dioxide),
 \code{"sc_sample"} (single channel spectrum of the sample measurement),
 \code{"sc_ref"} (single channel spectrum of the reference measurement),
 \code{"ig_sample"} (interferogram of the sample measurement) and \code{"ig_ref"}
