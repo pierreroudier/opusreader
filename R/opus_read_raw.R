@@ -712,28 +712,42 @@ opus_read_raw <- function(
       }
     )
   )
-
+  
   # Only select "DAT" string positions that are immediately before time
   dat_sel <- vapply(
     seq_along(tim),
     FUN = function(i) {
       diff_sel <- dat - tim[i]
-      dat[which(diff_sel <= 32 & diff_sel >= -20)]
+      res <- dat[which(diff_sel <= 32 & diff_sel >= -20)]
+      
+      # If no valid position can be extracted we flag value as NA
+      if (length(res) == 0) res <- NA
+      
+      res
     },
     FUN.VALUE = numeric(1)
   )
 
   date <- lapply(
     dat_sel,
-    function(dat) {
-      seek(con, dat, origin = "start", rw = "read")
-      readBin(
-        con,
-        what = "character",
-        n = 10,
-        size = 1,
-        endian = "little"
-      )[1]
+    function(dat){
+      
+      # If not date string was extracted we just return NA
+      if (is.na(dat)) {
+        res <- NA
+      } else {
+        seek(con, dat, origin = "start", rw = "read")
+        res <- readBin(
+          con,
+          what = "character",
+          n = 10,
+          size = 1,
+          endian = "little"
+        )[1]
+      }
+      
+      res
+      
     }
   )
 
