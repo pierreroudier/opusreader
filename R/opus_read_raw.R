@@ -713,6 +713,11 @@ opus_read_raw <- function(
     )
   )
   
+  # Time needs to have a valid encoding; replace entries that have invalid
+  # encoding with NA
+  time_invalid <- !vapply(time, validEnc, FUN.VALUE = logical(1))
+  time[time_invalid] <- NA
+  
   # Only select "DAT" string positions that are immediately before time
   dat_sel <- vapply(
     seq_along(tim),
@@ -792,8 +797,11 @@ opus_read_raw <- function(
     }
   )
 
-  # Select only result spectra abbreviations that are more than 0 characters
-  # long
+  # Select only result spectra abbreviations that have valid encoding and
+  # are more than 0 characters long; some OPUS files had invalid encoding
+  # for this entry (first element)
+  PLF_invalid <- !vapply(PLF_all, validEnc, FUN.VALUE = logical(1))
+  PLF_all[PLF_invalid] <- NA
   PLF <- unlist(PLF_all[lapply(PLF_all, nchar) > 0])
   PLF <- unique(unlist(strsplit(PLF, "'")))
 
@@ -829,7 +837,7 @@ opus_read_raw <- function(
   file_name_nopath <- NA
 
   # Create unique_id using file_name and time
-  ymdhms_id <- max(date_time)
+  ymdhms_id <- max(date_time, na.rm = TRUE)
   unique_id <- paste0(sample_id, "_", ymdhms_id)
 
   ## Convert all spectra in list spc into a matrix of 1 row ====================
@@ -855,8 +863,8 @@ opus_read_raw <- function(
     # file_id = file_name_nopath, # pb (20170514): changed `scan_id` to `file_id`
     sample_id = sample_id,
     rep_no = as.numeric(rep_no),
-    date_time_sm = max(date_time),
-    date_time_rf = min(date_time),
+    date_time_sm = max(date_time, na.rm = TRUE),
+    date_time_rf = min(date_time, na.rm = TRUE),
     sample_name = SNM,
     instr_name_range = instr_range,
     resolution_wn = RES,
