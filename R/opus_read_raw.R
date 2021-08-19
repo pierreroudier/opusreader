@@ -67,6 +67,9 @@ opus_read_raw <- function(
 
   # Avoid `R CMD check` NOTE: no visible binding for global variable ...
   x <- y <- i <- npt <- NULL
+  
+  # do not stop if one OPUS has erroneous parsing for any reason
+  try({
 
   # Read byte positions for selected 3 letter strings that flag important
   # spectral information -------------------------------------------------------
@@ -832,9 +835,10 @@ opus_read_raw <- function(
 
   # == sample ID ==
 
-  sample_id <- unlist(strsplit(SNM, ";", useBytes = TRUE))[1]
-  rep_no <- NA
-  file_name_nopath <- NA
+  sample_name <- unlist(strsplit(SNM, ";", useBytes = TRUE))[1]
+  sample_id <- sub("(.+)\\.[[:digit:]]+$", "\\1", sample_name)
+  rep_no <- sub(".+\\.([[:digit:]])+$", "\\1", sample_name)
+  file_name_nopath <- NA # PB: 2021-08-19: to fix
 
   # Create unique_id using file_name and time
   ymdhms_id <- max(date_time, na.rm = TRUE)
@@ -987,4 +991,5 @@ opus_read_raw <- function(
 
   # Return spectra data and metadata contained as elements in list out
   return(out)
+  }) # closes try() function
 }
