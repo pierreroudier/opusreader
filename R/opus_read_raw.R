@@ -479,7 +479,7 @@ opus_read_raw <- function(
     seek(con, end_spc[which_AB[length(which_AB)]], origin = "start", rw = "read")
     spc[[which_AB[length(which_AB)]]] <- readBin(
       con,
-      what = "integer",
+      what = "numeric",
       # n = NPT_spc[which_AB[length(which_AB)]] * 4,
       n = NPT_spc[which_AB[length(which_AB)]],
       size = 4,
