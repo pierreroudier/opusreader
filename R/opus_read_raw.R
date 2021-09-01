@@ -866,7 +866,7 @@ opus_read_raw <- function(
     # Removing "file_id" which does not make sense on RAW streams
     # file_id = file_name_nopath, # pb (20170514): changed `scan_id` to `file_id`
     sample_id = sample_id,
-    rep_no = as.numeric(rep_no),
+    # rep_no = as.numeric(rep_no), # pb 2021-09-01: find workaround to re-add
     date_time_sm = max(date_time, na.rm = TRUE),
     date_time_rf = min(date_time, na.rm = TRUE),
     sample_name = SNM,
