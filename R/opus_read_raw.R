@@ -836,8 +836,8 @@ opus_read_raw <- function(
   # == sample ID ==
 
   sample_name <- unlist(strsplit(SNM, ";", useBytes = TRUE))[1]
-  sample_id <- sub("(.+)\\.[[:digit:]]+$", "\\1", sample_name)
-  rep_no <- sub(".+\\.([[:digit:]])+$", "\\1", sample_name)
+  sample_id <- sample_name
+  # PB: 2021-09-01: todo: add `rep_no` via `file_id` or `stream_id`
   file_name_nopath <- NA # PB: 2021-08-19: to fix
 
   # Create unique_id using file_name and time
