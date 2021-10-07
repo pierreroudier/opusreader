@@ -75,7 +75,7 @@ opus_read <- function(
         if (!file.exists(fn)) stop(paste0("File '", fn, "' does not exist"))
 
         # Get raw vector
-        rw <- readBin(fn, "raw", 1e5)
+        rw <- readBin(fn, "raw", 1e8)
         out <- opus_read_raw(rw, type = type, atm_comp_minus4offset = atm_comp_minus4offset)
 
         return(out)
@@ -88,7 +88,7 @@ opus_read <- function(
         if (!file.exists(fn)) stop(paste0("File '", fn, "' does not exist"))
 
         # Get raw vector
-        rw <- readBin(fn, "raw", 1e5)
+        rw <- readBin(fn, "raw", 1e8)
         out <- opus_read_raw(rw, type = type, atm_comp_minus4offset = atm_comp_minus4offset)
 
         return(out)
