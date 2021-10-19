@@ -1,6 +1,6 @@
 <!-- NEWS.md is maintained by https://cynkra.github.io/fledge, do not edit -->
 
-# opusreader 0.5.0
+# opusreader 0.4.2
 
 - added workaround for corrupted date fields (spits NA in this case)
 - Fixed the extra FXV/LXV correction method

@@ -67,6 +67,9 @@ opus_read_raw <- function(
 
   # Avoid `R CMD check` NOTE: no visible binding for global variable ...
   x <- y <- i <- npt <- NULL
+  
+  # do not stop if one OPUS has erroneous parsing for any reason
+  try({
 
   # Read byte positions for selected 3 letter strings that flag important
   # spectral information -------------------------------------------------------
@@ -476,7 +479,7 @@ opus_read_raw <- function(
     seek(con, end_spc[which_AB[length(which_AB)]], origin = "start", rw = "read")
     spc[[which_AB[length(which_AB)]]] <- readBin(
       con,
-      what = "integer",
+      what = "numeric",
       # n = NPT_spc[which_AB[length(which_AB)]] * 4,
       n = NPT_spc[which_AB[length(which_AB)]],
       size = 4,
@@ -713,6 +716,11 @@ opus_read_raw <- function(
     )
   )
   
+  # Time needs to have a valid encoding; replace entries that have invalid
+  # encoding with NA
+  time_invalid <- !vapply(time, validEnc, FUN.VALUE = logical(1))
+  time[time_invalid] <- NA
+  
   # Only select "DAT" string positions that are immediately before time
   dat_sel <- vapply(
     seq_along(tim),
@@ -792,8 +800,11 @@ opus_read_raw <- function(
     }
   )
 
-  # Select only result spectra abbreviations that are more than 0 characters
-  # long
+  # Select only result spectra abbreviations that have valid encoding and
+  # are more than 0 characters long; some OPUS files had invalid encoding
+  # for this entry (first element)
+  PLF_invalid <- !vapply(PLF_all, validEnc, FUN.VALUE = logical(1))
+  PLF_all[PLF_invalid] <- NA
   PLF <- unlist(PLF_all[lapply(PLF_all, nchar) > 0])
   PLF <- unique(unlist(strsplit(PLF, "'")))
 
@@ -824,12 +835,13 @@ opus_read_raw <- function(
 
   # == sample ID ==
 
-  sample_id <- unlist(strsplit(SNM, ";", useBytes = TRUE))[1]
-  rep_no <- NA
-  file_name_nopath <- NA
+  sample_name <- unlist(strsplit(SNM, ";", useBytes = TRUE))[1]
+  sample_id <- sample_name
+  # PB: 2021-09-01: todo: add `rep_no` via `file_id` or `stream_id`
+  file_name_nopath <- NA # PB: 2021-08-19: to fix
 
   # Create unique_id using file_name and time
-  ymdhms_id <- max(date_time)
+  ymdhms_id <- max(date_time, na.rm = TRUE)
   unique_id <- paste0(sample_id, "_", ymdhms_id)
 
   ## Convert all spectra in list spc into a matrix of 1 row ====================
@@ -854,9 +866,9 @@ opus_read_raw <- function(
     # Removing "file_id" which does not make sense on RAW streams
     # file_id = file_name_nopath, # pb (20170514): changed `scan_id` to `file_id`
     sample_id = sample_id,
-    rep_no = as.numeric(rep_no),
-    date_time_sm = max(date_time),
-    date_time_rf = min(date_time),
+    # rep_no = as.numeric(rep_no), # pb 2021-09-01: find workaround to re-add
+    date_time_sm = max(date_time, na.rm = TRUE),
+    date_time_rf = min(date_time, na.rm = TRUE),
     sample_name = SNM,
     instr_name_range = instr_range,
     resolution_wn = RES,
@@ -979,4 +991,5 @@ opus_read_raw <- function(
 
   # Return spectra data and metadata contained as elements in list out
   return(out)
+  }) # closes try() function
 }
