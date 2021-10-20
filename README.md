@@ -41,7 +41,7 @@ fn <- opus_file()
 s <- opus_read(fn)
 
 # Plot the spectra
-plot(s$wavenumbers, s$spc, type = 'l')
+plot(s$wavenumbers, s$spec, type = 'l')
 ```
 
 2. The `opus_read_raw` function is lower level, and allows to read a `raw` representation of the OPUS file. It is useful if the OPUS file is "streamed" over eg a web service:
