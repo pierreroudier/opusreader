@@ -27,8 +27,9 @@ additional values for the character vector supplied to \code{type} are \code{"sp
 \item{simplify}{Logical (defaults to \code{FALSE}): if set to \code{TRUE}, returns a flattened list.
 The first element of that list (\code{wavenumbers}) is the wavenumbers of the first file read.
 The second element (\code{spectra}) is a matrix of the corresponding spectra. Especially useful when
-passing more than one file to the \code{file} option, for example to read a suite of spectral file
-directly into a matrix.}
+passing more than one file to the \code{file} option, for example to read a suite of spectral file.
+directly into a matrix.
+If the files do not have the same number of wavebands, the wavebands of the very first file passed to \code{file} is used as a reference for linear interpolation.}
 
 \item{wns_digits}{Integer that specifies the number of decimal places used to round
 the wavenumbers (values of x-variables) if \code{simplify = TRUE}.}

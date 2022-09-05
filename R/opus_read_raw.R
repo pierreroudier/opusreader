@@ -67,7 +67,7 @@ opus_read_raw <- function(
 
   # Avoid `R CMD check` NOTE: no visible binding for global variable ...
   x <- y <- i <- npt <- NULL
-  
+
   # do not stop if one OPUS has erroneous parsing for any reason
   try({
 
@@ -429,6 +429,8 @@ opus_read_raw <- function(
     which_Sc <- names(which(peak_ratio < 0.9))
   }
 
+  # browser()
+
   # Check for single channel, exclude spectral blocks already assigned to
   # interferograms
   Sc_assigned <- if (length(which_Sc) == 0) {
@@ -511,7 +513,9 @@ opus_read_raw <- function(
 
   # Order spc_idx from 1 to n spectra (n = length of end_spc)
   order_spc <- as.numeric(
-    sub(".*idx", "", unlist(list_assigned_t[["spc_idx"]])))
+    sub(".*idx", "", unlist(list_assigned_t[["spc_idx"]]))
+  )
+
   spc_type <- spc_code[order(order_spc)]
 
   # Set spectrum type as element names of spectra list (spc)
@@ -715,22 +719,22 @@ opus_read_raw <- function(
       }
     )
   )
-  
+
   # Time needs to have a valid encoding; replace entries that have invalid
   # encoding with NA
   time_invalid <- !vapply(time, validEnc, FUN.VALUE = logical(1))
   time[time_invalid] <- NA
-  
+
   # Only select "DAT" string positions that are immediately before time
   dat_sel <- vapply(
     seq_along(tim),
     FUN = function(i) {
       diff_sel <- dat - tim[i]
       res <- dat[which(diff_sel <= 32 & diff_sel >= -20)]
-      
+
       # If no valid position can be extracted we flag value as NA
       if (length(res) == 0) res <- NA
-      
+
       res
     },
     FUN.VALUE = numeric(1)
@@ -739,7 +743,7 @@ opus_read_raw <- function(
   date <- lapply(
     dat_sel,
     function(dat){
-      
+
       # If not date string was extracted we just return NA
       if (is.na(dat)) {
         res <- NA
@@ -753,9 +757,9 @@ opus_read_raw <- function(
           endian = "little"
         )[1]
       }
-      
+
       res
-      
+
     }
   )
 

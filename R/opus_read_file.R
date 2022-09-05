@@ -15,8 +15,9 @@
 #' @param simplify Logical (defaults to `FALSE`): if set to `TRUE`, returns a flattened list.
 #'   The first element of that list (`wavenumbers`) is the wavenumbers of the first file read.
 #'   The second element (`spectra`) is a matrix of the corresponding spectra. Especially useful when
-#'   passing more than one file to the `file` option, for example to read a suite of spectral file
+#'   passing more than one file to the `file` option, for example to read a suite of spectral file.
 #'   directly into a matrix.
+#'   If the files do not have the same number of wavebands, the wavebands of the very first file passed to `file` is used as a reference for linear interpolation.
 #' @param wns_digits Integer that specifies the number of decimal places used to round
 #'   the wavenumbers (values of x-variables) if `simplify = TRUE`.
 #' @param progress Logical (defaults to `TRUE`) whether a message is printed when an OPUS binary file
@@ -107,7 +108,7 @@ opus_read <- function(
              Simple output is currently only implemented for one value of the `type` option.\n
              A workaround this limitation is to use the `lapply` function, e.g.:\n\n
              lapply(c('spec', 'sc_ref'), function(x) read_opus(file, type = x, simplify = TRUE))
-             ")
+             ", call. = FALSE)
       }
 
       # Fetch wavenumbers
@@ -121,7 +122,8 @@ opus_read <- function(
 
       # Check the wavenumbers have all the same length
       if (length(unique(sapply(wns, length))) > 1) {
-        stop("Spectra can't be combined since they don't all have the same number of wavenumbers.")
+        # stop("Spectra can't be combined since they don't all have the same number of wavenumbers.", call. = FALSE)
+        warning("Spectra don't all have the same number of wavenumbers. Interpolation will be used to combine them in a matrix.", call. = FALSE)
       }
 
       specs <- lapply(
